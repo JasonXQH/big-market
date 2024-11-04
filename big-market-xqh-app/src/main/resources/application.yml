@@ -1,0 +1,5 @@
+spring:
+  config:
+    name: big-market-xqh-app
+  profiles:
+    active: dev
