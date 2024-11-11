@@ -61,6 +61,12 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
                 return RaffleAwardEntity.builder()
                         .awardId(randomAwardId)
                         .build();
+            }else if (DefaultLogicFactory.LogicModel.RULE_WHITELIST.getCode().equals(beforeRuleActionEntity.getRuleModel())){
+                Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, beforeRuleActionEntity.getData().getRuleWeightValueKey());
+                return RaffleAwardEntity.builder()
+                        .awardId(randomAwardId)
+                        .build();
+
             }
         }
         Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId);
