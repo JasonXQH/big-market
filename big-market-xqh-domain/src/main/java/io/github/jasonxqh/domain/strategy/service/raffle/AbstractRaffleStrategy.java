@@ -6,14 +6,14 @@ import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RuleActionEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-
-import javax.xml.ws.Response;
 
 /**
  * @author : jasonxu
@@ -21,6 +21,7 @@ import javax.xml.ws.Response;
  * @created : 2024/11/11, 星期一
  * @Description : 抽奖策略抽象类
  **/
+@Slf4j
 public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
     protected IStrategyRepository strategyRepository;
 
@@ -44,7 +45,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         //2. 策略查询
         StrategyEntity strategyEntity = strategyRepository.queryStrategyEntityByStrategyId(strategyId);
         //3. 抽奖前-规则过滤
-        RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> beforeRuleActionEntity = this.doCheckRaffleBeforLogic(RaffleFactorEntity.builder()
+        RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> beforeRuleActionEntity = this.doCheckRaffleBeforeLogic(RaffleFactorEntity.builder()
                 .userId(userId)
                 .strategyId(strategyId)
                 .build(), strategyEntity.ruleModels());
@@ -61,20 +62,33 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
                 return RaffleAwardEntity.builder()
                         .awardId(randomAwardId)
                         .build();
-            }else if (DefaultLogicFactory.LogicModel.RULE_WHITELIST.getCode().equals(beforeRuleActionEntity.getRuleModel())){
-                Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, beforeRuleActionEntity.getData().getRuleWeightValueKey());
-                return RaffleAwardEntity.builder()
-                        .awardId(randomAwardId)
-                        .build();
-
             }
         }
+
         Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId);
+
+        StrategyAwardRuleModelVO strategyAwardRuleModelVO = strategyRepository.queryStrategyAwardRuleModelVO(strategyId, randomAwardId);
+
+        //抽奖中，次数过滤 ,传入awardId
+        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> centerRuleActionEntity = this.doCheckRaffleCenterLogic(RaffleFactorEntity.builder()
+                .userId(userId)
+                .strategyId(strategyId)
+                .awardId(randomAwardId)
+                .build(), strategyAwardRuleModelVO.getCenterRuleModels());
+        if(RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(centerRuleActionEntity.getCode())){
+            //返回保底
+            log.info("【临时日志】中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。");
+            return RaffleAwardEntity.builder()
+                    .awardDesc("中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。")
+                    .build();
+        }
         return RaffleAwardEntity.builder()
                 .awardId(randomAwardId)
                 .build();
 
     }
 
-    protected abstract RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforLogic(RaffleFactorEntity build, String[] strings);
+    protected abstract RuleActionEntity<RuleActionEntity.RaffleCenterEntity> doCheckRaffleCenterLogic(RaffleFactorEntity build,String[] strings);
+
+    protected abstract RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforeLogic(RaffleFactorEntity build, String[] strings);
 }
