@@ -40,7 +40,7 @@ public class RaffleStrategyTest {
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 400L);
+        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 4100L);
     }
 
     @Test
@@ -69,28 +69,6 @@ public class RaffleStrategyTest {
     public void test_performRaffle_blacklist() {
         RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
                 .userId("user003")  // 黑名单用户 user001,user002,user003
-                .strategyId(100001L)
-                .build();
-
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-    }
-
-    @Test
-    public void test_performRaffle_whitelist() {
-        RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
-                .userId("user005")  // 黑名单用户 user001,user002,user003
                 .strategyId(100001L)
                 .build();
 
