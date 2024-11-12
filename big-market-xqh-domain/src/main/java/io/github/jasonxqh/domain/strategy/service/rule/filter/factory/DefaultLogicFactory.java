@@ -1,4 +1,4 @@
-package io.github.jasonxqh.domain.strategy.service.rule.factory;
+package io.github.jasonxqh.domain.strategy.service.rule.filter.factory;
 
 import io.github.jasonxqh.domain.strategy.model.entity.RuleActionEntity;
 import io.github.jasonxqh.domain.strategy.service.rule.ILogicFilter;

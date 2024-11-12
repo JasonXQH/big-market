@@ -5,9 +5,11 @@ import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RuleActionEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RuleMatterEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import io.github.jasonxqh.domain.strategy.service.AbstractRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.ILogicFilter;
-import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,9 +33,10 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
     @Resource
     private DefaultLogicFactory logicFactory;
 
-    public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch) {
-        super(strategyRepository, strategyDispatch);
+    public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory) {
+        super(strategyRepository, strategyDispatch, chainFactory);
     }
+
 
     @Override
     protected RuleActionEntity<RuleActionEntity.RaffleCenterEntity> doCheckRaffleCenterLogic(RaffleFactorEntity raffleFactorEntity, String[] logics) {

@@ -1,6 +1,6 @@
 package io.github.jasonxqh.domain.strategy.model.vo;
 
-import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import io.github.jasonxqh.types.common.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author : jasonxu
