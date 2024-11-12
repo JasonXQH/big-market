@@ -11,6 +11,8 @@ import com.alibaba.fastjson.JSON;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
+import io.github.jasonxqh.domain.strategy.service.armory.IStrategyArmory;
+import io.github.jasonxqh.domain.strategy.service.rule.impl.RuleLockLogicFilter;
 import io.github.jasonxqh.domain.strategy.service.rule.impl.RuleWeightLogicFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -33,14 +35,24 @@ import javax.annotation.Resource;
 public class RaffleStrategyTest {
 
     @Resource
+    private IStrategyArmory strategyArmory;
+    @Resource
     private IRaffleStrategy raffleStrategy;
-
     @Resource
     private RuleWeightLogicFilter ruleWeightLogicFilter;
+    @Resource
+    private RuleLockLogicFilter ruleLockLogicFilter;
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 4100L);
+        // 策略装配 100001、100002、100003
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100001L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100002L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100003L));
+
+        // 通过反射 mock 规则中的值
+        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 40500L);
+        ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
     }
 
     @Test
@@ -86,5 +98,36 @@ public class RaffleStrategyTest {
         log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
         log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
     }
+
+    /**
+     * 次数错校验，抽奖n次后解锁。100003 策略，你可以通过调整 @Before 的 setUp 方法中个人抽奖次数来验证。比如最开始设置0，之后设置10
+     * ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
+     */
+    @Test
+    public void test_raffle_center_rule_lock(){
+        RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
+                .userId("xiaofuge")
+                .strategyId(100003L)
+                .build();
+
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+
+    }
+
 
 }
