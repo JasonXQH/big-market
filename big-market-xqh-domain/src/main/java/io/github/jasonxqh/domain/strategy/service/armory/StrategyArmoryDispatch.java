@@ -44,11 +44,11 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         if(null == strategyRuleEntity){
             throw new AppException(ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getCode(),ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getInfo()  );
         };
-        Map<String, List<Integer>> ruleWeightsValueMap = strategyRuleEntity.getRuleWeights();
+        Map<String, List<Integer>>  ruleWeightsValueMap = strategyRuleEntity.getRuleWeights();
 
         Set<String> keys = ruleWeightsValueMap.keySet();
         for(String key : keys){
-            List<Integer> ruleWeightValues = ruleWeightsValueMap.get(key);
+            List<Integer>ruleWeightValues = ruleWeightsValueMap.get(key);
             ArrayList<StrategyAwardEntity> strategyAwardEntitiesClone = new ArrayList<>(strategyAwardEntities);
             strategyAwardEntitiesClone.removeIf(entity -> !ruleWeightValues.contains(entity.getAwardId()));
             assembleLotteryStrategy(String.valueOf(strategyId).concat("_").concat(key), strategyAwardEntitiesClone);
