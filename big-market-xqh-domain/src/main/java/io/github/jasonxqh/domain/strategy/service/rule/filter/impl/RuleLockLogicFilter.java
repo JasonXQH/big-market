@@ -1,4 +1,4 @@
-package io.github.jasonxqh.domain.strategy.service.rule.impl;
+package io.github.jasonxqh.domain.strategy.service.rule.filter.impl;
 
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.entity.RuleActionEntity;
@@ -6,9 +6,8 @@ import io.github.jasonxqh.domain.strategy.model.entity.RuleMatterEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import io.github.jasonxqh.domain.strategy.service.annotation.LogicStrategy;
 import io.github.jasonxqh.domain.strategy.service.rule.ILogicFilter;
-import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.rule.Rule;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;

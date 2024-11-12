@@ -1,6 +1,6 @@
 package io.github.jasonxqh.domain.strategy.service.annotation;
 
-import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
