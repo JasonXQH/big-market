@@ -1,21 +1,13 @@
 package io.github.jasonxqh.test.domain;
 
-/**
- * @author : jasonxu
- * @mailto : xuqihang74@gmail.com
- * @created : 2024/11/11, 星期一
- * @Description :
- **/
-
-import com.alibaba.fastjson.JSON;
+import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyArmory;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.impl.RuleWeightLogicChain;
-import io.github.jasonxqh.domain.strategy.service.rule.filter.impl.RuleLockLogicFilter;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,19 +32,15 @@ public class RaffleStrategyTest {
     private IRaffleStrategy raffleStrategy;
     @Resource
     private RuleWeightLogicChain ruleWeightLogicChain;
-    @Resource
-    private RuleLockLogicFilter ruleLockLogicFilter;
 
     @Before
     public void setUp() {
         // 策略装配 100001、100002、100003
         log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100001L));
-        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100002L));
-        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100003L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100006L));
 
         // 通过反射 mock 规则中的值
-        ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 40500L);
-        ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
+        ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 0L);
     }
 
     @Test
@@ -62,19 +50,10 @@ public class RaffleStrategyTest {
                 .strategyId(100001L)
                 .build();
 
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-//        log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
-//        log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
+        RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
+
+        log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
+        log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
 
     @Test
@@ -84,19 +63,10 @@ public class RaffleStrategyTest {
                 .strategyId(100001L)
                 .build();
 
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
+
+        log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
+        log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
 
     /**
@@ -110,24 +80,10 @@ public class RaffleStrategyTest {
                 .strategyId(100003L)
                 .build();
 
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
-        log.info("测试结果: "+JSON.toJSONString( raffleStrategy.performRaffle(raffleFactorEntity)));
+        RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
 
+        log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
+        log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
-
 
 }
