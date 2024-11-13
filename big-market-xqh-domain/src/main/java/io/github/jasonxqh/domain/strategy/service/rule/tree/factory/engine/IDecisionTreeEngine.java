@@ -10,5 +10,5 @@ import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeF
  **/
 public interface IDecisionTreeEngine {
 
-    DefaultTreeFactory.StrategyAwardData process(String userId, Long strategyId, Integer awardId);
+    DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId);
 }

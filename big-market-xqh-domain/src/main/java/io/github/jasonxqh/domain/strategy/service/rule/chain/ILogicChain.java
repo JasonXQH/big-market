@@ -1,5 +1,8 @@
 package io.github.jasonxqh.domain.strategy.service.rule.chain;
 
+
+import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -13,7 +16,7 @@ public interface ILogicChain  extends ILogicChainArmory {
      * @param strategyId    策略ID
      * @return 奖品ID
      * */
-    Integer logic(String userId, Long Strategy);
+    DefaultChainFactory.StrategyAwardVO logic(String userId, Long Strategy);
 
 
 }

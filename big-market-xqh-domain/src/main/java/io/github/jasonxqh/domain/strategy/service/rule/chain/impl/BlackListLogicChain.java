@@ -2,6 +2,8 @@ package io.github.jasonxqh.domain.strategy.service.rule.chain.impl;
 
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.AbstractLogicChain;
+import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import io.github.jasonxqh.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,7 @@ public class BlackListLogicChain extends AbstractLogicChain {
 
 
     @Override
-    public Integer logic(String userId, Long strategyId) {
+    public DefaultChainFactory.StrategyAwardVO logic(String userId, Long strategyId) {
         log.info("抽奖责任链-黑名单开始 userId:{} strategyId:{} ruleModel:{} ", userId, strategyId,ruleModel());
         String ruleValue = strategyRepository.queryStrategyRuleValue(strategyId, ruleModel());
 
@@ -36,7 +38,10 @@ public class BlackListLogicChain extends AbstractLogicChain {
         boolean isBlackListed = Arrays.asList(userNames).contains(userId);
         if(isBlackListed){
             log.info("抽奖责任链-黑名单接管 userId:{} strategyId:{} ruleModel:{} ", userId, strategyId,ruleModel());
-            return awardId;
+            return DefaultChainFactory.StrategyAwardVO.builder()
+                    .awardId(awardId)
+                    .logicModel(ruleModel())
+                    .build();
         }
         log.info("抽奖责任链-黑名单放行 userId:{} strategyId:{} ruleModel:{} ", userId, strategyId,ruleModel());
         return next().logic(userId, strategyId);
@@ -44,6 +49,6 @@ public class BlackListLogicChain extends AbstractLogicChain {
 
     @Override
     protected String ruleModel() {
-        return "rule_blacklist";
+        return DefaultChainFactory.LogicModel.RULE_BLACKLIST.getCode();
     }
 }

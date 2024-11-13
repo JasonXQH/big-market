@@ -3,6 +3,8 @@ package io.github.jasonxqh.domain.strategy.adapter.repository;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
+import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeNodeVO;
+import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 
 import java.util.HashMap;
@@ -34,4 +36,7 @@ public interface IStrategyRepository {
     String queryStrategyRuleValue(Long strategyId, String ruleModel);
 
     StrategyAwardRuleModelVO queryStrategyAwardRuleModelVO(Long strategyId, Integer awardId);
+
+    RuleTreeVO queryRuleTreeVOByTreeId(String treeId);
+
 }
