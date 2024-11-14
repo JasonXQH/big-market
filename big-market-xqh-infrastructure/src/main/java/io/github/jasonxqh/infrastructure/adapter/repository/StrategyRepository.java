@@ -4,6 +4,7 @@ import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
+import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.infrastructure.dao.IStrategyAwardDao;
 import io.github.jasonxqh.infrastructure.dao.IStrategyDao;
@@ -41,6 +42,7 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Resource
     private IRedisService redisService;
+
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -146,6 +148,11 @@ public class StrategyRepository implements IStrategyRepository {
         return StrategyAwardRuleModelVO.builder()
                 .ruleModels(ruleModels)
                 .build();
+    }
+
+    @Override
+    public RuleTreeVO queryRuleTreeVO(String ruleModels) {
+        return null;
     }
 
 
