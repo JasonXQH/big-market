@@ -11,7 +11,6 @@ import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeF
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
 import io.github.jasonxqh.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -28,13 +27,9 @@ import java.util.Arrays;
 public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
 
 
-    private final DefaultTreeFactory defaultTreeFactory;
-
-    public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory, DefaultChainFactory defaultChainFactory, DefaultTreeFactory defaultTreeFactory) {
+    public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
         super(strategyRepository, strategyDispatch, chainFactory, treeFactory);
-        this.defaultTreeFactory = defaultTreeFactory;
     }
-
 
     @Override
     public DefaultChainFactory.StrategyAwardVO raffleLogicChain(String userId, Long strategyId) {
@@ -57,7 +52,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
         if(null == ruleTreeVO) {
             throw new RuntimeException("存在抽奖策略配置的规则模型，但是未在库表中配置对应的规则树信息");
         }
-        IDecisionTreeEngine decisionTreeEngine = defaultTreeFactory.openLogicTree(ruleTreeVO);
+        IDecisionTreeEngine decisionTreeEngine = treeFactory.openLogicTree(ruleTreeVO);
         DefaultTreeFactory.StrategyAwardVO strategyAwardVO = decisionTreeEngine.process(userId, strategyId, awardId);
         return strategyAwardVO;
     }
