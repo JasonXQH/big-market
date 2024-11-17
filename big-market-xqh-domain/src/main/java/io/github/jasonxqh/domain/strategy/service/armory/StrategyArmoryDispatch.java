@@ -4,6 +4,7 @@ import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
+import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,15 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         //1. 查询策略配置
         List<StrategyAwardEntity> strategyAwardEntities =  repository.queryStrategyAwardList(strategyId);
         assembleLotteryStrategy(String.valueOf(strategyId), strategyAwardEntities);
+        //2. 缓存奖品库存，用于decr扣减库存使用
+        for(StrategyAwardEntity strategyAwardEntity : strategyAwardEntities) {
+            Integer awardId = strategyAwardEntity.getAwardId();
+            Integer awardCount = strategyAwardEntity.getAwardCount();
+            cacheStrategyCount(strategyId,awardId,awardCount);
 
-        //2. 权重策略配置，适用于rule_weight权重规则配置
-
+        }
+        //3.1 默认装配配置[全量抽奖概率]
+        //3.2 权重策略配置，适用于rule_weight权重规则配置
         StrategyEntity strategyEntity = repository.queryStrategyEntityByStrategyId(strategyId);
         String ruleModel = strategyEntity.getRuleWeight();
         if(null == ruleModel) return true;
@@ -58,6 +65,11 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         return true;
     }
 
+    private void cacheStrategyCount(Long strategyId, Integer awardId, Integer awardCount) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY  +strategyId + "_" + awardId;
+        repository.cacheStrategyAwardCount(cacheKey,awardCount);
+    }
+
     //专门做装配动作
     private void assembleLotteryStrategy(String key, List<StrategyAwardEntity> strategyAwardEntities ){
         //1. 读取表中数据的加和值，以及最小概率值。
@@ -71,7 +83,7 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
                 .map(StrategyAwardEntity::getAwardRate)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        //3.用综合除以最小值，获取概率范围。(百分位千分位万分位)
+        //3.用总和除以最小值，获取概率范围。(百分位千分位万分位)
         BigDecimal rateRange = totalAwardRate.divide(minAwardRate,0,BigDecimal.ROUND_CEILING);
         //4. 生成策略
         ArrayList<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
@@ -113,5 +125,12 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
         int rateRange = repository.getRateRange(key);
         return repository.getStrategyAwardAssemble(key,new SecureRandom().nextInt(rateRange
         ));
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(Long strategyId, Integer awardId) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY+strategyId + "_" + awardId;
+        return repository.subtractAwardStock(cacheKey);
+
     }
 }

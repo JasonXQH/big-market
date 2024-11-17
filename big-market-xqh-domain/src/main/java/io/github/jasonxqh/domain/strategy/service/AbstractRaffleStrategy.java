@@ -3,6 +3,7 @@ package io.github.jasonxqh.domain.strategy.service;
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
+import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
@@ -18,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Description : 抽奖策略抽象类
  **/
 @Slf4j
-public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
+public abstract class AbstractRaffleStrategy implements IRaffleStrategy,IRaffleStock{
     protected IStrategyRepository strategyRepository;
 
     protected IStrategyDispatch strategyDispatch;
@@ -56,12 +57,20 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
         DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = raffleLogicTree(userId, strategyId,chainStrategyAwardVO.getAwardId());
         log.info("抽奖策略计算-策略树 {} {} {} {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
         // 4. 返回抽奖结果
+        return buildRaffleAwardEntity(strategyId,treeStrategyAwardVO.getAwardId(),treeStrategyAwardVO.getAwardRuleValue());
+//        return RaffleAwardEntity.builder()
+//                .awardId(treeStrategyAwardVO.getAwardId())
+//                .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
+//                .build();
+    }
+    private RaffleAwardEntity buildRaffleAwardEntity(Long strategyId, Integer awardId, String awardConfig) {
+        StrategyAwardEntity strategyAward = strategyRepository.queryStrategyAwardEntity(strategyId, awardId);
         return RaffleAwardEntity.builder()
-                .awardId(treeStrategyAwardVO.getAwardId())
-                .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
+                .awardId(awardId)
+                .awardConfig(awardConfig)
+                .sort(strategyAward.getSort())
                 .build();
     }
-
     public abstract DefaultChainFactory.StrategyAwardVO raffleLogicChain(String userId,Long strategyId);
 
     public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId,Long strategyId,Integer awardId);

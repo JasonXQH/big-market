@@ -41,7 +41,8 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
         RuleTreeNodeVO ruleTreeNodeVO = treeNodeMap.get(nextNode);
         while(null != nextNode) {
             ILogicTreeNode logicTreeNode = logicTreeNodeGroup.get(ruleTreeNodeVO.getRuleKey());
-            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId);
+            String ruleValue = ruleTreeNodeVO.getRuleValue();
+            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId,ruleValue);
 
             RuleLogicCheckTypeVO ruleLogicCheckTypeVO = logicEntity.getRuleLogicCheckTypeVO();
 

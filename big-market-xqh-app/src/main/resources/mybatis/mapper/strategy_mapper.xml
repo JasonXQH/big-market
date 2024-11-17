@@ -23,7 +23,8 @@
                 strategy_desc,
                 rule_models
         FROM strategy
-        WHERE strategy_id = #{strategy_id};
+        WHERE strategy_id = #{strategyId};
     </select>
+
 
 </mapper>

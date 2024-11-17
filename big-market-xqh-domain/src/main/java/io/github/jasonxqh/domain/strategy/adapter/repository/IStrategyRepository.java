@@ -3,9 +3,9 @@ package io.github.jasonxqh.domain.strategy.adapter.repository;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
-import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeNodeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
+import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,4 +39,15 @@ public interface IStrategyRepository {
 
     RuleTreeVO queryRuleTreeVOByTreeId(String treeId);
 
+    void cacheStrategyAwardCount(String cacheKey, Integer awardCount);
+
+    Boolean subtractAwardStock(String cacheKey);
+
+    void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
+
+    StrategyAwardStockKeyVO takeQueueValue();
+
+    void updateStrategyAwardStock(Long strategyId, Integer awardId);
+
+    StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId);
 }

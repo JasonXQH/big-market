@@ -1,9 +1,14 @@
 package io.github.jasonxqh.domain.strategy.service.raffle;
 
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
+import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
+import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 import io.github.jasonxqh.domain.strategy.service.AbstractRaffleStrategy;
+import io.github.jasonxqh.domain.strategy.service.IRaffleAward;
+import io.github.jasonxqh.domain.strategy.service.IRaffleStock;
+import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.ILogicChain;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
@@ -14,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -24,7 +30,7 @@ import java.util.Arrays;
  **/
 @Slf4j
 @Service
-public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
+public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRaffleAward {
 
 
     public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
@@ -45,7 +51,8 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
 
         }
         log.info("strategyAwardRuleModelVO.getRuleModels :{}", strategyAwardRuleModelVO.getRuleModels());
-        if(!Arrays.asList( strategyAwardRuleModelVO.getRuleModels().split(Constants.SPLIT)).contains("rule_lock")){
+        if(!strategyAwardRuleModelVO.getRuleModels().equals("tree_lock")){
+            log.info("被拦截，返回");
             return DefaultTreeFactory.StrategyAwardVO.builder().awardId(awardId).build();
         }
         RuleTreeVO ruleTreeVO = strategyRepository.queryRuleTreeVOByTreeId(strategyAwardRuleModelVO.getRuleModels());
@@ -55,6 +62,23 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
         IDecisionTreeEngine decisionTreeEngine = treeFactory.openLogicTree(ruleTreeVO);
         DefaultTreeFactory.StrategyAwardVO strategyAwardVO = decisionTreeEngine.process(userId, strategyId, awardId);
         return strategyAwardVO;
+    }
+
+
+    @Override
+    public StrategyAwardStockKeyVO takeQueueValue() throws InterruptedException {
+        return strategyRepository.takeQueueValue();
+    }
+
+    @Override
+    public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
+        strategyRepository.updateStrategyAwardStock( strategyId,  awardId);
+    }
+
+    @Override
+    public  List<StrategyAwardEntity> queryRaffleStrategyAwardList(Long strategyId){
+        List<StrategyAwardEntity> strategyAwardEntities = strategyRepository.queryStrategyAwardList(strategyId);
+        return strategyAwardEntities;
     }
 
 

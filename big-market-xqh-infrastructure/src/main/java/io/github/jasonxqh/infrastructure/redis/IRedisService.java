@@ -237,5 +237,11 @@ public interface IRedisService {
 
 
     <K, V> RMap<K, V> getMap(String key);
+
+    Long getAtomicLong(String key);
+
+    void setAtomicLong(String key, Integer awardCount);
+
+    Boolean setNx(String key);
 }
 
