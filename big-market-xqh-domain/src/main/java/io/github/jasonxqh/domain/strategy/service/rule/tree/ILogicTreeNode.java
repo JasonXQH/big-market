@@ -10,6 +10,6 @@ import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeF
  **/
 public interface ILogicTreeNode {
 
-    DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId);
+    DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId,String ruleValue);
 
 }
