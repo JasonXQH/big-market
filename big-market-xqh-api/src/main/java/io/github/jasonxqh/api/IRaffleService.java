@@ -15,7 +15,9 @@ import java.util.List;
  * @Description :
  **/
 public interface IRaffleService {
+    //策略装配接口
     Response<Boolean> strategyArmory(Long strategyId);
+
     Response<List<RaffleAwardListResponseDTO>> queryStrategyAwardList(RaffleAwardListRequestDTO requestDTO);
     Response<RaffleResponseDTO> randomRaffle(RaffleRequestDTO requestDTO);
 }

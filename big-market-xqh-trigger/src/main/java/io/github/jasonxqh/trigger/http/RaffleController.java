@@ -28,15 +28,16 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @RestController()
-@CrossOrigin("${app.config.cross-origin}")
-@RequestMapping("/api/${app.config.api-version}/raffle/")
-public class RaffleService implements IRaffleService {
+@CrossOrigin("*")
+@RequestMapping("/api/v1/raffle/")
+public class RaffleController implements IRaffleService {
     private IRaffleStrategy raffleStrategy;
     private IStrategyArmory strategyArmory;
     private IRaffleAward raffleAward;
-    public RaffleService(IRaffleStrategy raffleStrategy, IStrategyArmory strategyArmory) {
+    public RaffleController(IRaffleStrategy raffleStrategy, IStrategyArmory strategyArmory, IRaffleAward raffleAward) {
         this.raffleStrategy = raffleStrategy;
         this.strategyArmory = strategyArmory;
+        this.raffleAward = raffleAward;
     }
 
     /**
@@ -49,31 +50,31 @@ public class RaffleService implements IRaffleService {
     @RequestMapping(value = "strategy_armory", method = RequestMethod.GET)
     @Override
     public Response<Boolean> strategyArmory(@RequestParam Long strategyId) {
-        log.info("抽奖策略装配开始 strategyId：{}", strategyId);
-        boolean flag = strategyArmory.assembleLotteryStrategy(strategyId);
-        if(flag) {
+        try{
+            log.info("抽奖策略装配开始 strategyId：{}", strategyId);
+            boolean armoryStatus = strategyArmory.assembleLotteryStrategy(strategyId);
             Response<Boolean> response = Response.<Boolean>builder()
                     .code(ResponseCode.SUCCESS.getCode())
                     .info(ResponseCode.SUCCESS.getInfo())
-                    .data(true)
+                    .data(armoryStatus)
                     .build();
             log.info("抽奖策略装配完成 strategyId：{} response: {}", strategyId, JSON.toJSONString(response));
             return response;
-        }else{
+        }catch (Exception e){
+            log.info("抽奖策略装配失败 strategyId：{} response: {}", strategyId);
             Response<Boolean> response = Response.<Boolean>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
-                    .info("装配失败,策略ID: "+strategyId)
                     .build();
-            log.info("抽奖策略装配失败 strategyId：{} response: {}", strategyId, JSON.toJSONString(response));
             return response;
         }
     }
     @RequestMapping(value = "query_raffle_award_list", method = RequestMethod.POST)
     @Override
-    public Response<List<RaffleAwardListResponseDTO>> queryStrategyAwardList(@RequestParam RaffleAwardListRequestDTO requestDTO) {
+    public Response<List<RaffleAwardListResponseDTO>> queryStrategyAwardList(@RequestBody RaffleAwardListRequestDTO requestDTO) {
         Long strategyId = requestDTO.getStrategyId();
         try {
+            log.info("查询抽奖奖品列表开始 strategyId:{}", strategyId);
             List<StrategyAwardEntity> strategyAwardEntities = raffleAward.queryRaffleStrategyAwardList(strategyId);
             List<RaffleAwardListResponseDTO> awardListResponseDTOS = strategyAwardEntities.stream()
                     .map(award -> RaffleAwardListResponseDTO.builder()
@@ -91,21 +92,20 @@ public class RaffleService implements IRaffleService {
             log.info("查询奖品列表成功 strategyId：{} response: {}", strategyId, JSON.toJSONString(response));
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
             log.info("查询奖品列表失败 strategyId：{}", strategyId);
 
             return  Response.<List<RaffleAwardListResponseDTO>>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
                     .build();
-
-
         }
+        return null;
 
     }
     @RequestMapping(value = "random_raffle", method = RequestMethod.POST)
     @Override
-    public Response<RaffleResponseDTO> randomRaffle(@RequestParam RaffleRequestDTO requestDTO) {
+    public Response<RaffleResponseDTO> randomRaffle(@RequestBody RaffleRequestDTO requestDTO) {
         try{
             Long strategyId = requestDTO.getStrategyId();
             RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(RaffleFactorEntity.builder()
@@ -124,7 +124,7 @@ public class RaffleService implements IRaffleService {
             log.info("随机抽奖完成 strategyId: {} response: {}", requestDTO.getStrategyId(), JSON.toJSONString(response));
             return response;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
             log.info("随机抽奖失败 strategyId: {} response: {}", requestDTO.getStrategyId());
             return Response.<RaffleResponseDTO>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
