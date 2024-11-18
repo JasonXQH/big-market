@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Description : 抽奖策略抽象类
  **/
 @Slf4j
-public abstract class AbstractRaffleStrategy implements IRaffleStrategy,IRaffleStock{
+public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
     protected IStrategyRepository strategyRepository;
 
     protected IStrategyDispatch strategyDispatch;
@@ -49,19 +49,13 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy,IRaffleS
         DefaultChainFactory.StrategyAwardVO chainStrategyAwardVO = raffleLogicChain(userId, strategyId);
         log.info("抽奖策略计算-责任链 {} {} {} {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
         if (!DefaultChainFactory.LogicModel.RULE_DEFAULT.getCode().equals(chainStrategyAwardVO.getLogicModel())) {
-            return RaffleAwardEntity.builder()
-                    .awardId(chainStrategyAwardVO.getAwardId())
-                    .build();
+            return buildRaffleAwardEntity(strategyId,chainStrategyAwardVO.getAwardId(),null);
         }
         //3. 规则树抽奖过滤
         DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = raffleLogicTree(userId, strategyId,chainStrategyAwardVO.getAwardId());
         log.info("抽奖策略计算-策略树 {} {} {} {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
         // 4. 返回抽奖结果
         return buildRaffleAwardEntity(strategyId,treeStrategyAwardVO.getAwardId(),treeStrategyAwardVO.getAwardRuleValue());
-//        return RaffleAwardEntity.builder()
-//                .awardId(treeStrategyAwardVO.getAwardId())
-//                .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
-//                .build();
     }
     private RaffleAwardEntity buildRaffleAwardEntity(Long strategyId, Integer awardId, String awardConfig) {
         StrategyAwardEntity strategyAward = strategyRepository.queryStrategyAwardEntity(strategyId, awardId);

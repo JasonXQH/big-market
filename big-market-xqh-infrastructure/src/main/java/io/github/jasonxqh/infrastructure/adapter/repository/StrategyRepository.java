@@ -9,6 +9,7 @@ import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.*;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
 import io.github.jasonxqh.types.common.Constants;
+import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
@@ -19,6 +20,8 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static io.github.jasonxqh.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_ARMORY;
 
 /**
  * @author : jasonxu
@@ -54,7 +57,7 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
-        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_KEY + strategyId;
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_LIST_KEY + strategyId;
         List<StrategyAwardEntity> strategyAwardEntities = redisService.getValue(cacheKey);
         if(strategyAwardEntities != null && !strategyAwardEntities.isEmpty()) {
             return strategyAwardEntities;
@@ -69,6 +72,9 @@ public class StrategyRepository implements IStrategyRepository {
                         .awardCount(strategyAward.getAwardCount())
                         .awardCountSurplus(strategyAward.getAwardCountSurplus())
                         .awardRate(strategyAward.getAwardRate())
+                        .awardTitle(strategyAward.getAwardTitle())
+                        .awardSubtitle(strategyAward.getAwardSubtitle())
+                        .sort(strategyAward.getSort())
                         .build())
                 .collect(Collectors.toList());
         redisService.setValue(cacheKey, strategyAwardEntities);
@@ -118,12 +124,16 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public int getRateRange(Long strategyId) {
-        return redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY +strategyId);
+        return getRateRange(String.valueOf(strategyId));
     }
 
     @Override
     public int getRateRange(String key) {
-        return redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key);
+        String cacheKey = Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key;
+        if (!redisService.isExists(cacheKey)) {
+            throw new AppException(UN_ASSEMBLED_STRATEGY_ARMORY.getCode(), cacheKey + Constants.COLON + UN_ASSEMBLED_STRATEGY_ARMORY.getInfo());
+        }
+        return redisService.getValue(cacheKey);
     }
 
 
