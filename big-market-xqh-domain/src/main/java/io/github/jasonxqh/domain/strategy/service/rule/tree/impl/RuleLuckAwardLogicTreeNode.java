@@ -27,6 +27,7 @@ public class RuleLuckAwardLogicTreeNode implements ILogicTreeNode {
         // 兜底奖励配置
         Integer luckAwardId = Integer.valueOf(ruleParts[0]);
         String awardRuleValue = ruleParts.length > 1 ? ruleParts[1] : "";
+        log.info("走兜底奖品：随机积分");
         return DefaultTreeFactory.TreeActionEntity.builder()
                 .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
                 .strategyAwardVO(DefaultTreeFactory.StrategyAwardVO.builder()

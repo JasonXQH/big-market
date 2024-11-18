@@ -47,7 +47,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
             RuleLogicCheckTypeVO ruleLogicCheckTypeVO = logicEntity.getRuleLogicCheckTypeVO();
 
             strategyAwardData = logicEntity.getStrategyAwardVO();
-            log.info("决策树引擎【{}】treeId:{} node:{} code:{}", ruleTreeVO.getTreeName(), ruleTreeVO.getTreeId(), nextNode, ruleLogicCheckTypeVO.getCode());
+            log.info("决策树引擎【{}】treeId:{} nextNode:{} code:{} info:{}", ruleTreeVO.getTreeName(), ruleTreeVO.getTreeId(), nextNode, ruleLogicCheckTypeVO.getCode(),ruleLogicCheckTypeVO.getInfo());
             //判断下一个节点，matterValue是TAKE_OVER还是ALLOW
             nextNode = nextNode(ruleLogicCheckTypeVO.getCode(), ruleTreeNodeVO.getTreeNodeLineVOList());
             ruleTreeNodeVO = treeNodeMap.get(nextNode);
