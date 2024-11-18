@@ -57,16 +57,16 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
     }
 
 
-    private  String nextNode(String matterValue, List<RuleTreeNodeLineVO> ruleTreeNodeLineVOList ) {
-        if(null == ruleTreeNodeLineVOList|| ruleTreeNodeLineVOList.isEmpty()) return null;
-
-        for(RuleTreeNodeLineVO ruleTreeNodeLineVO : ruleTreeNodeLineVOList) {
-            if(decisionLogic(matterValue, ruleTreeNodeLineVO)) {
-                return ruleTreeNodeLineVO.getRuleNodeTo();
+    public String nextNode(String matterValue, List<RuleTreeNodeLineVO> treeNodeLineVOList) {
+        if (null == treeNodeLineVOList || treeNodeLineVOList.isEmpty()) return null;
+        for (RuleTreeNodeLineVO nodeLine : treeNodeLineVOList) {
+            if (decisionLogic(matterValue, nodeLine)) {
+                return nodeLine.getRuleNodeTo();
             }
         }
-        throw new RuntimeException("决策树引擎，nextNode 计算失败，未找到可执行节点！");
+        return null;
     }
+
 
 
     public boolean decisionLogic(String matterValue, RuleTreeNodeLineVO nodeLine) {
