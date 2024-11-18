@@ -90,7 +90,7 @@ public class RaffleController implements IRaffleService {
                     .data(awardListResponseDTOS)
                     .build();
             log.info("查询奖品列表成功 strategyId：{} response: {}", strategyId, JSON.toJSONString(response));
-
+            return response;
         } catch (Exception e) {
 //            throw new RuntimeException(e);
             log.info("查询奖品列表失败 strategyId：{}", strategyId);
@@ -100,8 +100,6 @@ public class RaffleController implements IRaffleService {
                     .info(ResponseCode.UN_ERROR.getInfo())
                     .build();
         }
-        return null;
-
     }
     @RequestMapping(value = "random_raffle", method = RequestMethod.POST)
     @Override

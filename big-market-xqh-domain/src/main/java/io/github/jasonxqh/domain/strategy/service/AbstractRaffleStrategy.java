@@ -53,10 +53,11 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
         }
         //3. 规则树抽奖过滤
         DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = raffleLogicTree(userId, strategyId,chainStrategyAwardVO.getAwardId());
-        log.info("抽奖策略计算-策略树 {} {} {} {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
+        log.info("抽奖策略计算-策略树 userId:{} 策略Id: {} 责任链抽到的奖品ID {} 奖品logicModel {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
         // 4. 返回抽奖结果
         return buildRaffleAwardEntity(strategyId,treeStrategyAwardVO.getAwardId(),treeStrategyAwardVO.getAwardRuleValue());
     }
+
     private RaffleAwardEntity buildRaffleAwardEntity(Long strategyId, Integer awardId, String awardConfig) {
         StrategyAwardEntity strategyAward = strategyRepository.queryStrategyAwardEntity(strategyId, awardId);
         return RaffleAwardEntity.builder()

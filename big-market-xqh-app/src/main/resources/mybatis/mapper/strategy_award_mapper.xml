@@ -30,21 +30,16 @@
                 rule_models,
                 sort,
         FROM strategy_award
-        LIMIT 10;
+        WHERE strategy_id = #{strategyId};
     </select>
 
-    <select id="queryStrategyAwardListByStrategyId"  parameterType="java.lang.Long"  resultMap="dataMap">
-        SELECT   strategy_id,
-                 award_id,
-                 award_title,
-                 award_subtitle,
-                 award_count,
-                 award_count_surplus,
-                 award_rate,
-                 sort,
-        FROM strategy_award
-        WHERE strategy_id = #{strategy_id};
+    <select id="queryStrategyAwardListByStrategyId" parameterType="java.lang.Long" resultMap="dataMap">
+        select strategy_id, award_id, award_title, award_subtitle, award_count, award_count_surplus, award_rate, sort
+        from strategy_award
+        where strategy_id = #{strategyId}
+        order by sort asc
     </select>
+
     <select id="queryStrategyAward" parameterType="io.github.jasonxqh.infrastructure.dao.po.StrategyAward" resultMap="dataMap">
         SELECT  strategy_id,
                 award_id,
@@ -56,8 +51,8 @@
                 rule_models,
                 sort
         FROM strategy_award
-        WHERE strategy_id = #{strategy_id}
-        AND award_id = #{award_id};
+        WHERE strategy_id = #{strategyId}
+        AND award_id = #{awardId};
     </select>
 
 

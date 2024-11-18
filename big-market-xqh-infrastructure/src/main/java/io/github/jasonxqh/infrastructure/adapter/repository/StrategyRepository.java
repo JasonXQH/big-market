@@ -57,6 +57,7 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
+        log.info("开始查询awardList");
         String cacheKey = Constants.RedisKey.STRATEGY_AWARD_LIST_KEY + strategyId;
         List<StrategyAwardEntity> strategyAwardEntities = redisService.getValue(cacheKey);
         if(strategyAwardEntities != null && !strategyAwardEntities.isEmpty()) {
@@ -78,6 +79,7 @@ public class StrategyRepository implements IStrategyRepository {
                         .build())
                 .collect(Collectors.toList());
         redisService.setValue(cacheKey, strategyAwardEntities);
+        log.info("查询awardList成功");
         return strategyAwardEntities;
     }
 
@@ -94,6 +96,7 @@ public class StrategyRepository implements IStrategyRepository {
                 .strategyDesc(strategy.getStrategyDesc())
                  .ruleModels(strategy.getRuleModels())
                   .build();
+        redisService.setValue(cacheKey, strategyEntity);
         return strategyEntity;
     }
 
@@ -231,31 +234,33 @@ public class StrategyRepository implements IStrategyRepository {
     public Boolean subtractAwardStock(String cacheKey) {
         long surplus = redisService.decr(cacheKey);
         if(surplus < 0){
-            redisService.setValue(cacheKey, 0);
+            redisService.setAtomicLong(cacheKey, 0);
             return false;
         }
+        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
+        // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         Boolean lock = redisService.setNx(lockKey);
         if(!lock) log.info("策略奖品库存加锁失败 {}",lockKey);
         return lock;
-
     }
+
 
     @Override
     public void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
         String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
         RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
         RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
-        delayedQueue.offer(strategyAwardStockKeyVO,30, TimeUnit.SECONDS);
+        delayedQueue.offer(strategyAwardStockKeyVO,3, TimeUnit.SECONDS);
     }
 
     @Override
     public StrategyAwardStockKeyVO takeQueueValue() {
         String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
         RBlockingQueue<StrategyAwardStockKeyVO> destinationQueue = redisService.getBlockingQueue(cacheKey);
-        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(destinationQueue);
+//        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(destinationQueue);
         //看看会发生什么？
-        return delayedQueue.poll();
+        return destinationQueue.poll();
     }
 
     @Override
