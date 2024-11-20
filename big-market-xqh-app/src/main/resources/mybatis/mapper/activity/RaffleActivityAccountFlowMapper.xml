@@ -2,8 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.jasonxqh.infrastructure.dao.RaffleActivityAccountFlowDao">
   <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountFlow">
-    <!--@mbg.generated-->
-    <!--@Table raffle_activity_account_flow-->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="user_id" jdbcType="VARCHAR" property="userId" />
     <result column="activity_id" jdbcType="BIGINT" property="activityId" />
@@ -16,9 +14,4 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, user_id, activity_id, total_count, day_count, month_count, flow_id, flow_channel, 
-    biz_id, create_time, update_time
-  </sql>
 </mapper>
