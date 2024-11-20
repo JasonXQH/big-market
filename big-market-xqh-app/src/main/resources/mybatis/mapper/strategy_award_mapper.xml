@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.jasonxqh.infrastructure.dao.IStrategyAwardDao">
 
-    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.StrategyAward">
+    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyAward">
         <id column="id" property="id"/>
         <result column="strategy_id" property="strategyId"/>
         <result column="award_id" property="awardId"/>
@@ -40,7 +40,7 @@
         order by sort asc
     </select>
 
-    <select id="queryStrategyAward" parameterType="io.github.jasonxqh.infrastructure.dao.po.StrategyAward" resultMap="dataMap">
+    <select id="queryStrategyAward" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyAward" resultMap="dataMap">
         SELECT  strategy_id,
                 award_id,
                 award_title,
@@ -56,7 +56,7 @@
     </select>
 
 
-    <select id="queryStrategyAwardRuleModel"  parameterType="io.github.jasonxqh.infrastructure.dao.po.StrategyAward"  resultType="java.lang.String">
+    <select id="queryStrategyAwardRuleModel" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyAward" resultType="java.lang.String">
         SELECT  rule_models
         FROM strategy_award
         WHERE strategy_id = #{strategyId}

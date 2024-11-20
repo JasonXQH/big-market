@@ -1,4 +1,4 @@
-package io.github.jasonxqh.infrastructure.dao.po;
+package io.github.jasonxqh.infrastructure.dao.po.strategy;
 
 import lombok.Data;
 

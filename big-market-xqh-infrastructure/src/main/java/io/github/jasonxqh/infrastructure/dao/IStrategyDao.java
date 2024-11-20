@@ -1,6 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import io.github.jasonxqh.infrastructure.dao.po.Strategy;
+import io.github.jasonxqh.infrastructure.dao.po.strategy.Strategy;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

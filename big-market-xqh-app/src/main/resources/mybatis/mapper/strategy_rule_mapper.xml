@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.jasonxqh.infrastructure.dao.IStrategyRuleDao">
 
-    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.StrategyRule">
+    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule">
         <id column="id" property="id"/>
         <result column="strategy_id" property="strategyId"/>
         <result column="award_id" property="awardId"/>
@@ -26,7 +26,7 @@
         LIMIT 10;
     </select>
 
-    <select id="queryStrategyRule" parameterType="io.github.jasonxqh.infrastructure.dao.po.StrategyRule" resultMap="dataMap">
+    <select id="queryStrategyRule" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule" resultMap="dataMap">
         SELECT
             strategy_id,
             award_id,
@@ -40,7 +40,7 @@
           AND rule_model = #{ruleModel}
     </select>
 
-    <select id="queryStrategyRuleValue" parameterType="io.github.jasonxqh.infrastructure.dao.po.StrategyRule" resultType="java.lang.String">
+    <select id="queryStrategyRuleValue" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule" resultType="java.lang.String">
         SELECT
             rule_value
         FROM

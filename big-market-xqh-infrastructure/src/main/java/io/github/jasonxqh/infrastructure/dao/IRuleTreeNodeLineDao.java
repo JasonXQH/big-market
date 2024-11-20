@@ -1,7 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeNodeLineVO;
-import io.github.jasonxqh.infrastructure.dao.po.RuleTreeNodeLine;
+import io.github.jasonxqh.infrastructure.dao.po.strategy.RuleTreeNodeLine;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
