@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jasonxqh.infrastructure.dao.RaffleActivityDao">
+  <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivity">
+    <!--@mbg.generated-->
+    <!--@Table raffle_activity-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="activity_id" jdbcType="BIGINT" property="activityId" />
+    <result column="activity_name" jdbcType="VARCHAR" property="activityName" />
+    <result column="activity_desc" jdbcType="VARCHAR" property="activityDesc" />
+    <result column="begin_date_time" jdbcType="TIMESTAMP" property="beginDateTime" />
+    <result column="end_date_time" jdbcType="TIMESTAMP" property="endDateTime" />
+    <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
+    <result column="stock_count_surplus" jdbcType="INTEGER" property="stockCountSurplus" />
+    <result column="activity_count_id" jdbcType="BIGINT" property="activityCountId" />
+    <result column="strategy_id" jdbcType="BIGINT" property="strategyId" />
+    <result column="state" jdbcType="VARCHAR" property="state" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, activity_id, activity_name, activity_desc, begin_date_time, end_date_time, stock_count, 
+    stock_count_surplus, activity_count_id, strategy_id, `state`, create_time, update_time
+  </sql>
+</mapper>
