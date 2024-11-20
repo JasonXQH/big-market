@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.jasonxqh.infrastructure.dao.IRuleTreeNodeLineDao">
 
-    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.RuleTreeNodeLine">
+    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.strategy.RuleTreeNodeLine">
         <id     column="id" property="id"/>
         <result column="tree_id" property="treeId"/>
         <result column="rule_node_from" property="ruleNodeFrom"/>

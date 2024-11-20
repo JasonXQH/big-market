@@ -1,8 +1,9 @@
-package io.github.jasonxqh.infrastructure.dao.po;
+package io.github.jasonxqh.infrastructure.dao.po.strategy;
 
 import lombok.Data;
 
 import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -10,12 +11,13 @@ import java.util.Date;
  * @Description :
  **/
 @Data
-public class RuleTree {
+public class RuleTreeNodeLine {
     private Long    id;
     private String  treeId;
-    private String  treeName;
-    private String  treeDesc;
-    private String  treeNodeRuleKey;
+    private String  ruleNodeFrom;
+    private String  ruleNodeTo;
+    private String  ruleLimitType;
+    private String  ruleLimitValue;
     private Date    createTime;
     private Date    updateTime;
 }

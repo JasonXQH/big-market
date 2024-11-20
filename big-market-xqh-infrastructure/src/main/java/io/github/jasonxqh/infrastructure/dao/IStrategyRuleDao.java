@@ -1,6 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import io.github.jasonxqh.infrastructure.dao.po.StrategyRule;
+import io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -19,3 +19,4 @@ public interface IStrategyRuleDao {
 
     String queryStrategyRuleValue(StrategyRule strategyRuleReq);
 }
+

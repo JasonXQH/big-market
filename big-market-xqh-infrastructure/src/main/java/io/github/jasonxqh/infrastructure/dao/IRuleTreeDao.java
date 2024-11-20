@@ -1,6 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import io.github.jasonxqh.infrastructure.dao.po.RuleTree;
+import io.github.jasonxqh.infrastructure.dao.po.strategy.RuleTree;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.jasonxqh.infrastructure.dao.IStrategyDao">
 
-    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.Strategy">
+    <resultMap id="dataMap" type="io.github.jasonxqh.infrastructure.dao.po.strategy.Strategy">
         <id column="id" property="id"/>
         <result column="strategy_id" property="strategyId"/>
         <result column="strategy_desc" property="strategyDesc"/>
