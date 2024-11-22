@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.github.jasonxqh.infrastructure.dao.RaffleActivityAccountFlowDao">
-  <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountFlow">
-    <id column="id" jdbcType="INTEGER" property="id" />
+<mapper namespace="io.github.jasonxqh.infrastructure.dao.IRaffleActivityAccountDao">
+  <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount">
+    <id column="id" jdbcType="BIGINT" property="id" />
     <result column="user_id" jdbcType="VARCHAR" property="userId" />
     <result column="activity_id" jdbcType="BIGINT" property="activityId" />
     <result column="total_count" jdbcType="INTEGER" property="totalCount" />
+    <result column="total_count_surplus" jdbcType="INTEGER" property="totalCountSurplus" />
     <result column="day_count" jdbcType="INTEGER" property="dayCount" />
+    <result column="day_count_surplus" jdbcType="INTEGER" property="dayCountSurplus" />
     <result column="month_count" jdbcType="INTEGER" property="monthCount" />
-    <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
-    <result column="flow_channel" jdbcType="VARCHAR" property="flowChannel" />
-    <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="month_count_surplus" jdbcType="INTEGER" property="monthCountSurplus" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
