@@ -8,9 +8,6 @@
     <result column="activity_desc" jdbcType="VARCHAR" property="activityDesc" />
     <result column="begin_date_time" jdbcType="TIMESTAMP" property="beginDateTime" />
     <result column="end_date_time" jdbcType="TIMESTAMP" property="endDateTime" />
-    <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
-    <result column="stock_count_surplus" jdbcType="INTEGER" property="stockCountSurplus" />
-    <result column="activity_count_id" jdbcType="BIGINT" property="activityCountId" />
     <result column="strategy_id" jdbcType="BIGINT" property="strategyId" />
     <result column="state" jdbcType="VARCHAR" property="state" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
@@ -19,7 +16,12 @@
 
 
     <select id="queryRaffleActivityByActivityId" parameterType="java.lang.Long" resultMap="dataMap">
-        select activity_id, activity_name, activity_desc, begin_date_time, end_date_time, stock_count, stock_count_surplus, activity_count_id, strategy_id, state
+        select  activity_id,
+                activity_name,
+                activity_desc,
+                begin_date_time,
+                end_date_time,
+                strategy_id, state
         from raffle_activity
         where activity_id = #{activityId}
     </select>

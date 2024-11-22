@@ -1,17 +1,20 @@
-package io.github.jasonxqh.infrastructure.dao.po.activity;
+package io.github.jasonxqh.domain.activity.model.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 抽奖活动单
  */
 @Data
-public class RaffleActivityOrder {
-    /**
-     * 自增ID
-     */
-    private Long id;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RaffleActivityOrderEntity {
 
     /**
      * 用户ID
@@ -68,18 +71,4 @@ public class RaffleActivityOrder {
      */
     private String state;
 
-    /**
-     * 业务仿重ID - 外部透传的，确保幂等
-     */
-    private String outBusinessNo;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 }
