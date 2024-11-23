@@ -1,6 +1,6 @@
 package io.github.jasonxqh.domain.activity.model.aggregate;
 
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountActivity;
+import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityOrderEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ public class CreateOrderAggregate {
     /**
      * 活动账户实体
      */
-    private RaffleActivityAccountActivity raffleActivityAccountActivity;
+    private RaffleActivityAccountEntity raffleActivityAccountEntity;
     /**
      * 活动订单实体
      */

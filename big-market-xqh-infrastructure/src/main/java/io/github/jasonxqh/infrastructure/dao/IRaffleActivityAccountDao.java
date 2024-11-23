@@ -1,9 +1,11 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import cn.bugstack.middleware.db.router.annotation.DBRouterStrategy;
+import io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-@DBRouterStrategy(splitTable = true)
 public interface IRaffleActivityAccountDao {
+    int updateAccountQuota(RaffleActivityAccount rafleActivityAccount);
+
+    void insert(RaffleActivityAccount raffleActivityAccount);
 }

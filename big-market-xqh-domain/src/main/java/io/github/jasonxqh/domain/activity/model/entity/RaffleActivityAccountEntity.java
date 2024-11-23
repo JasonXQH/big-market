@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 /**
  * 抽奖活动账户表
  */
@@ -14,7 +12,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RaffleActivityAccountActivity {
+public class RaffleActivityAccountEntity {
 
     /**
     * 用户ID
