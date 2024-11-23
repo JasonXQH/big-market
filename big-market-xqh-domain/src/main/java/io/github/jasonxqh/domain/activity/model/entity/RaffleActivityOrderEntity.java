@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.activity.model.entity;
 
+import io.github.jasonxqh.domain.activity.model.valobj.OrderStateVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -67,8 +68,13 @@ public class RaffleActivityOrderEntity {
     private Integer monthCount;
 
     /**
+     * 外部透传字段
+     */
+    private String outBusinessNo;
+
+    /**
      * 订单状态（complete）
      */
-    private String state;
+    private OrderStateVO state;
 
 }
