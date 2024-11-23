@@ -8,6 +8,7 @@ import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.ILogicFilter;
 import io.github.jasonxqh.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
  * @created : 2024/11/11, 星期一
  * @Description :
  **/
-
+@Slf4j
 @Service
 public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
     @Resource
@@ -33,10 +35,41 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
         super(strategyRepository, strategyDispatch);
     }
 
+    @Override
+    protected RuleActionEntity<RuleActionEntity.RaffleCenterEntity> doCheckRaffleCenterLogic(RaffleFactorEntity raffleFactorEntity, String[] logics) {
+        if (logics == null || 0 == logics.length)
+            return RuleActionEntity.<RuleActionEntity.RaffleCenterEntity>builder()
+                .code(RuleLogicCheckTypeVO.ALLOW.getCode())
+                .info(RuleLogicCheckTypeVO.ALLOW.getInfo())
+                .build();
+
+        Map<String,ILogicFilter<RuleActionEntity.RaffleCenterEntity>> logicFilterGroup = logicFactory.openLogicFilter();
+        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> ruleActionEntity = null;
+        for( String ruleModel : logics) {
+            ILogicFilter<RuleActionEntity.RaffleCenterEntity> raffleCenterEntityILogicFilter = logicFilterGroup.get(DefaultLogicFactory.LogicModel.RULE_LOCK.getCode());
+            RuleMatterEntity ruleMatterEntity = new RuleMatterEntity();
+            ruleMatterEntity.setUserId(raffleFactorEntity.getUserId());
+            ruleMatterEntity.setRuleModel(ruleModel);
+            ruleMatterEntity.setAwardId(raffleFactorEntity.getAwardId());
+            ruleMatterEntity.setStrategyId(raffleFactorEntity.getStrategyId());
+            ruleActionEntity = raffleCenterEntityILogicFilter.filter(ruleMatterEntity);
+            // 非放行结果则顺序过滤
+            log.info("抽奖中规则过滤 userId: {} ruleModel: {} code: {} info: {}", raffleFactorEntity.getUserId(), ruleModel, ruleActionEntity.getCode(), ruleActionEntity.getInfo());
+            if(RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(ruleMatterEntity.getStrategyId())) {
+                return ruleActionEntity;
+            }
+        }
+        return  ruleActionEntity;
+    }
 
 
     @Override
-    protected RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforLogic(RaffleFactorEntity raffleFactorEntity, String[] logics) {
+    protected RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforeLogic(RaffleFactorEntity raffleFactorEntity, String[] logics) {
+        if (logics == null || 0 == logics.length) return RuleActionEntity.<RuleActionEntity.RaffleBeforeEntity>builder()
+                .code(RuleLogicCheckTypeVO.ALLOW.getCode())
+                .info(RuleLogicCheckTypeVO.ALLOW.getInfo())
+                .build();
+
         Map<String, ILogicFilter<RuleActionEntity.RaffleBeforeEntity>> logicFilterGroup = logicFactory.openLogicFilter();
 
         //黑名单规则优先过滤

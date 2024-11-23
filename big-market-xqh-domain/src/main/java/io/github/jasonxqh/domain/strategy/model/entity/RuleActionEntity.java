@@ -43,9 +43,19 @@ public class RuleActionEntity<T extends  RuleActionEntity.RaffleEntity> {
         //商品ID
         private Integer awardId;
     }
-
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     static public class RaffleCenterEntity extends RaffleEntity {
+        //策略ID
+        private Long strategyId;
 
+        //权重值key：用于抽奖的时候可以过滤抽奖商品
+        private String ruleWeightValueKey;
+
+        //商品ID
+        private Integer awardId;
     }
     static public class RaffleAfterEntity extends RaffleEntity {
 

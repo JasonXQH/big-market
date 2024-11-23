@@ -4,6 +4,7 @@ import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
+import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.infrastructure.dao.IStrategyAwardDao;
 import io.github.jasonxqh.infrastructure.dao.IStrategyDao;
 import io.github.jasonxqh.infrastructure.dao.IStrategyRuleDao;
@@ -128,6 +129,18 @@ public class StrategyRepository implements IStrategyRepository {
         strategyRuleReq.setRuleModel(ruleModel);
         strategyRuleReq.setAwardId(awardId);
         return strategyRuleDao.queryStrategyRuleValue(strategyRuleReq);
+    }
+
+    @Override
+    public StrategyAwardRuleModelVO queryStrategyAwardRuleModelVO(Long strategyId, Integer awardId) {
+        StrategyAward strategyAwardReq = new StrategyAward();
+        strategyAwardReq.setStrategyId(strategyId);
+        strategyAwardReq.setAwardId(awardId);
+
+        String ruleModels = strategyAwardDao.queryStrategyAwardRuleModel(strategyAwardReq);
+        return StrategyAwardRuleModelVO.builder()
+                .ruleModels(ruleModels)
+                .build();
     }
 
 
