@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.activity.model.entity;
 
+import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,6 +49,6 @@ public class RaffleActivityEntity {
     /**
      * 活动状态
      */
-    private String state;
+    private ActivityStateVO state;
 
 }
