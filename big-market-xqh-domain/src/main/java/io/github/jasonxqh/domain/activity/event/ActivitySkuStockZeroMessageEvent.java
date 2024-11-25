@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 @Component
+@Getter
 public class ActivitySkuStockZeroMessageEvent extends BaseEvent<Long> {
     @Value("${spring.rabbitmq.topic.activity_sku_stock_zero}")
     private String topic;

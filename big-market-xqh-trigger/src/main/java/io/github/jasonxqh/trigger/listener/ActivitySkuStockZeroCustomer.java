@@ -5,7 +5,10 @@ import com.alibaba.fastjson2.TypeReference;
 import io.github.jasonxqh.domain.activity.service.ISkuStock;
 import io.github.jasonxqh.types.event.BaseEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,7 +30,13 @@ public class ActivitySkuStockZeroCustomer {
     @Resource
     private ISkuStock skuStock;
 
-    @RabbitListener(queuesToDeclare = @Queue(value = "activity_sku_stock_zero"))
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    value = @Queue(value = "activity_sku_stock_zero_queue", durable = "true"),
+                    exchange = @Exchange(value = "activity_sku_stock_zero_exchange"),
+                    key = "activity_sku_stock_zero"
+            )
+    )
     public void listener(String message) {
         try {
             log.info("监听活动sku库存消耗为0消息 topic: {} message: {}", topic, message);

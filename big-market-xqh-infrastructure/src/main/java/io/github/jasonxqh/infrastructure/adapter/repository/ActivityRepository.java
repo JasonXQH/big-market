@@ -200,8 +200,7 @@ public class ActivityRepository implements IActivityRepository {
     public Boolean substractionSkuStock(Long sku, String cacheKey, Date endDateTime) {
             long surplus = redisService.decr(cacheKey);
             if(surplus == 0){
-                //TODO: 库存消耗没了，发送MQ消息，更新数据库库存
-                eventPublisher.publish(activitySkuStockZeroMessageEvent.topic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
+                eventPublisher.publish(activitySkuStockZeroMessageEvent.getTopic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
                 return false;
             } else if (surplus < 0) {
                 redisService.setAtomicLong(cacheKey, 0);
