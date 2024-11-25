@@ -2,6 +2,8 @@ package io.github.jasonxqh.infrastructure.redis;
 
 import org.redisson.api.*;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -243,5 +245,7 @@ public interface IRedisService {
     void setAtomicLong(String key, Integer awardCount);
 
     Boolean setNx(String key);
+
+    Boolean setNx(String lockKey, Long expireMillis, TimeUnit timeUnit);
 }
 

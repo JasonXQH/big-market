@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActivitySkuVO {
+public class ActivitySkuStockKeyVO {
 
     private Long sku;
 

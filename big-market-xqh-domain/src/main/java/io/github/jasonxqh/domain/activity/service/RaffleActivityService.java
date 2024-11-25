@@ -3,7 +3,7 @@ package io.github.jasonxqh.domain.activity.service;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
-import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.activity.model.valobj.OrderStateVO;
 import io.github.jasonxqh.domain.activity.service.rule.chain.factory.DefaultActionChainFactory;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -61,12 +61,22 @@ public class RaffleActivityService extends AbstractRaffleActivity implements ISk
     }
 
     @Override
-    public ActivitySkuVO takeQueueValue() throws InterruptedException {
+    public ActivitySkuStockKeyVO takeQueueValue() throws InterruptedException {
         return activityRepository.takeQueueValue();
     }
 
     @Override
-    public void updateStrategyAwardStock(Long sku, Long activityId) {
-        activityRepository.updateSkuStock(sku,activityId);
+    public void updateStrategyAwardStock(Long sku) {
+        activityRepository.updateSkuStock(sku);
+    }
+
+    @Override
+    public void clearQueueValue() {
+        activityRepository.clearQueueValue();
+    }
+
+    @Override
+    public void clearActivitySkuStock(Long sku) {
+        activityRepository.clearActivitySkuStock(sku);
     }
 }

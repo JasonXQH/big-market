@@ -1,9 +1,7 @@
 package io.github.jasonxqh.trigger.job;
 
-import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.activity.service.ISkuStock;
-import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
-import io.github.jasonxqh.domain.strategy.service.IRaffleStock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,12 +27,12 @@ public class UpdateSkuStockJob {
     public void exec(){
         try {
             log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争");
-            ActivitySkuVO activitySkuVO = skuStock.takeQueueValue();
-            if(null == activitySkuVO){
+            ActivitySkuStockKeyVO activitySkuStockKeyVO = skuStock.takeQueueValue();
+            if(null == activitySkuStockKeyVO){
                 return;
             }
-            log.info("定时任务，更新 sku消耗库存 sku:{} activityId:{} ",activitySkuVO.getSku(), activitySkuVO.getActivityId());
-            skuStock.updateStrategyAwardStock(activitySkuVO.getSku(), activitySkuVO.getActivityId());
+            log.info("定时任务，更新 sku消耗库存 sku:{} activityId:{} ", activitySkuStockKeyVO.getSku(), activitySkuStockKeyVO.getActivityId());
+            skuStock.updateStrategyAwardStock(activitySkuStockKeyVO.getSku());
         }catch (Exception e){
             log.error("定时任务，更新sku 消耗库存失败",e);
         }

@@ -5,7 +5,9 @@ import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
-import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
+
+import java.util.Date;
 
 public interface IActivityRepository {
 
@@ -18,13 +20,18 @@ public interface IActivityRepository {
 
     void doSaveOrder(CreateOrderAggregate createOrderAggregate);
 
-    void storeActivitySku(String key,Integer skuCount);
+    void storeActivitySkuStockCount(String key, Integer skuCount);
 
-    Boolean substractionSkuStock(String cacheKey);
 
-    void awardSkuStockConsumeSendQueue(ActivitySkuVO activitySkuVO);
+    void awardSkuStockConsumeSendQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO);
 
-    ActivitySkuVO takeQueueValue();
+    ActivitySkuStockKeyVO takeQueueValue();
 
-    void updateSkuStock(Long sku, Long activityId);
+    void updateSkuStock(Long sku);
+
+    Boolean substractionSkuStock(Long sku, String cacheKey, Date endDateTime);
+
+    void clearQueueValue();
+
+    void clearActivitySkuStock(Long sku);
 }

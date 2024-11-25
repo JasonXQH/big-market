@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -15,18 +16,23 @@ public class ActivityArmoryDispatch implements IActivityDispatch,IActivitySkuArm
     IActivityRepository activityRepository;
 
     @Override
-    public Boolean subtractionSkuStock(Long sku) {
-        RaffleActivitySkuEntity raffleActivitySkuEntity = activityRepository.queryActivitySku(sku);
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + raffleActivitySkuEntity.getSku()+"_"+raffleActivitySkuEntity.getActivityId();
-        return activityRepository.substractionSkuStock(cacheKey);
+    public Boolean subtractionSkuStock(Long sku, Date endDateTime) {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + sku;
+        return activityRepository.substractionSkuStock(sku,cacheKey,endDateTime);
     }
 
     @Override
-    public boolean assembleActivitySku(Long sku, Long activityId) {
+    public boolean assembleActivitySku(Long sku) {
         //装配库存
         RaffleActivitySkuEntity raffleActivitySkuEntity = activityRepository.queryActivitySku(sku);
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + raffleActivitySkuEntity.getSku()+"_"+raffleActivitySkuEntity.getActivityId();
-        activityRepository.storeActivitySku(cacheKey, raffleActivitySkuEntity.getStockCountSurplus());
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + sku;
+        activityRepository.storeActivitySkuStockCount(cacheKey, raffleActivitySkuEntity.getStockCount());
+
+        //预热活动，查询时预热到缓存
+        activityRepository.queryActivityByActivityId(raffleActivitySkuEntity.getActivityId());
+        activityRepository.queryRaffleActivityCountByActivityCountId(raffleActivitySkuEntity.getActivityCountId());
+
+
         return true;
     }
 }

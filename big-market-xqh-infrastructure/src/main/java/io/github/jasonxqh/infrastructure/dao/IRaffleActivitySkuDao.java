@@ -8,4 +8,6 @@ public interface IRaffleActivitySkuDao {
     RaffleActivitySku queryActivitySku(Long sku);
 
     void updateSkuStock(Long sku);
+
+    void clearActivitySkuStock(Long sku);
 }

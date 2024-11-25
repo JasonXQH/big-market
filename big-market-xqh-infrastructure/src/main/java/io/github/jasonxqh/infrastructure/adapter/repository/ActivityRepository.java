@@ -3,25 +3,28 @@ package io.github.jasonxqh.infrastructure.adapter.repository;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import com.alibaba.fastjson.JSON;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
+import io.github.jasonxqh.domain.activity.event.ActivitySkuStockZeroMessageEvent;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
-import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.activity.*;
+import io.github.jasonxqh.infrastructure.event.EventPublisher;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
 import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
+import io.github.jasonxqh.types.event.BaseEvent;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -50,9 +53,12 @@ public class ActivityRepository implements IActivityRepository {
 
     @Resource
     private IDBRouterStrategy routerStrategy;
-    @Autowired
-    private IDBRouterStrategy dbRouterStrategy;
 
+    @Resource
+    private EventPublisher eventPublisher;
+
+    @Resource
+    private ActivitySkuStockZeroMessageEvent activitySkuStockZeroMessageEvent;
 
     @Override
     public RaffleActivitySkuEntity queryActivitySku(Long sku) {
@@ -96,6 +102,7 @@ public class ActivityRepository implements IActivityRepository {
             return countEntity;
         }
         RaffleActivityCount raffleActivityCount = countDao.queryRaffleActivityCountByActivityCountId(activityCountId);
+        log.info("raffleActivityCount : {}", JSON.toJSON(raffleActivityCount));
         countEntity = RaffleActivityCountEntity.builder()
                   .activityCountId(raffleActivityCount.getActivityCountId())
                   .totalCount(raffleActivityCount.getTotalCount())
@@ -134,8 +141,8 @@ public class ActivityRepository implements IActivityRepository {
              raffleActivityAccount.setDayCountSurplus(raffleActivityAccountEntity.getDayCount());
              raffleActivityAccount.setMonthCount(raffleActivityAccountEntity.getMonthCount());
              raffleActivityAccount.setMonthCountSurplus(raffleActivityAccountEntity.getMonthCount());
-            log.info("account json: {}" , JSON.toJSON(raffleActivityAccount));
-             dbRouterStrategy.doRouter(raffleActivityAccount.getUserId());
+//            log.info("account json: {}" , JSON.toJSON(raffleActivityAccount));
+            routerStrategy.doRouter(raffleActivityAccount.getUserId());
                  //编程式事务
                  transactionTemplate.execute(status -> {
                         try{
@@ -156,49 +163,70 @@ public class ActivityRepository implements IActivityRepository {
                         }
                  });
         }finally {
-            dbRouterStrategy.clear();
+            routerStrategy.clear();
         }
 
     }
 
     @Override
-    public void storeActivitySku(String key, Integer raffleActivitySkuEntity) {
+    public void storeActivitySkuStockCount(String key, Integer count) {
         if (redisService.isExists(key)) return;
-        redisService.setValue(key,raffleActivitySkuEntity);
+        redisService.setAtomicLong(key,count);
     }
 
-    @Override
-    public Boolean substractionSkuStock(String cacheKey) {
-        long surplus = redisService.decr(cacheKey);
-        if(surplus < 0){
-            redisService.setAtomicLong(cacheKey, 0);
-            return false;
-        }
-        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
-        // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
-        String lockKey = cacheKey + Constants.UNDERLINE + surplus;
-        Boolean lock = redisService.setNx(lockKey);
-        if(!lock) log.info("Sku库存扣减失败 {}",lockKey);
-        return lock;
-    }
+
 
     @Override
-    public void awardSkuStockConsumeSendQueue(ActivitySkuVO activitySkuVO) {
+    public void awardSkuStockConsumeSendQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO) {
         String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
         RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
         RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
-        delayedQueue.offer(activitySkuVO,3, TimeUnit.SECONDS);
+        delayedQueue.offer(activitySkuStockKeyVO,3, TimeUnit.SECONDS);
     }
 
     @Override
-    public ActivitySkuVO takeQueueValue() {
+    public ActivitySkuStockKeyVO takeQueueValue() {
         String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
-        RBlockingQueue<ActivitySkuVO> targetQueue = redisService.getBlockingQueue(cacheKey);
+        RBlockingQueue<ActivitySkuStockKeyVO> targetQueue = redisService.getBlockingQueue(cacheKey);
         return targetQueue.poll();
     }
 
     @Override
-    public void updateSkuStock(Long sku, Long activityId) {
+    public void updateSkuStock(Long sku) {
         skuDao.updateSkuStock(sku);
+    }
+
+    @Override
+    public Boolean substractionSkuStock(Long sku, String cacheKey, Date endDateTime) {
+            long surplus = redisService.decr(cacheKey);
+            if(surplus == 0){
+                //TODO: 库存消耗没了，发送MQ消息，更新数据库库存
+                eventPublisher.publish(activitySkuStockZeroMessageEvent.topic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
+                return false;
+            } else if (surplus < 0) {
+                redisService.setAtomicLong(cacheKey, 0);
+                return false;
+            }
+        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
+            // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
+            String lockKey = cacheKey + Constants.UNDERLINE + surplus;
+            Long expireMillis = endDateTime.getTime() - System.currentTimeMillis()+TimeUnit.DAYS.toMillis(1);
+            Boolean lock = redisService.setNx(lockKey,expireMillis,TimeUnit.MILLISECONDS);
+            if(!lock) log.info("Sku库存扣减失败 {}",lockKey);
+            return lock;
+    }
+
+    @Override
+    public void clearQueueValue() {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        blockingQueue.clear();
+        delayedQueue.clear();
+    }
+
+    @Override
+    public void clearActivitySkuStock(Long sku){
+        skuDao.clearActivitySkuStock(sku);
     }
 }
