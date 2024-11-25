@@ -3,6 +3,7 @@ package io.github.jasonxqh.domain.activity.service;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
 import io.github.jasonxqh.domain.activity.model.valobj.OrderStateVO;
 import io.github.jasonxqh.domain.activity.service.rule.chain.factory.DefaultActionChainFactory;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,7 +17,7 @@ import java.util.Date;
  * @date 2024/11/23
  */
 @Service
-public class RaffleActivityService extends AbstractRaffleActivity {
+public class RaffleActivityService extends AbstractRaffleActivity implements ISkuStock {
 
     public RaffleActivityService(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory) {
         super(activityRepository, actionChainFactory);
@@ -59,4 +60,13 @@ public class RaffleActivityService extends AbstractRaffleActivity {
         activityRepository.doSaveOrder(createOrderAggregate);
     }
 
+    @Override
+    public ActivitySkuVO takeQueueValue() throws InterruptedException {
+        return activityRepository.takeQueueValue();
+    }
+
+    @Override
+    public void updateStrategyAwardStock(Long sku, Long activityId) {
+        activityRepository.updateSkuStock(sku,activityId);
+    }
 }

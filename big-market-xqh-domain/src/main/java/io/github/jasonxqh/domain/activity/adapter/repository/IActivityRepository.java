@@ -5,9 +5,8 @@ import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
-import org.springframework.stereotype.Repository;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
 
-import javax.annotation.Resource;
 public interface IActivityRepository {
 
 
@@ -18,4 +17,14 @@ public interface IActivityRepository {
     RaffleActivityCountEntity queryRaffleActivityCountByActivityCountId(Long activityCountId);
 
     void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+
+    void storeActivitySku(String key,Integer skuCount);
+
+    Boolean substractionSkuStock(String cacheKey);
+
+    void awardSkuStockConsumeSendQueue(ActivitySkuVO activitySkuVO);
+
+    ActivitySkuVO takeQueueValue();
+
+    void updateSkuStock(Long sku, Long activityId);
 }

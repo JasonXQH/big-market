@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSON;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuVO;
+import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.activity.*;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
@@ -12,12 +14,16 @@ import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Repository
 public class ActivityRepository implements IActivityRepository {
@@ -76,7 +82,7 @@ public class ActivityRepository implements IActivityRepository {
                   .beginDateTime(raffleActivity.getBeginDateTime())
                   .endDateTime(raffleActivity.getEndDateTime())
                   .strategyId(raffleActivity.getStrategyId())
-                  .state(raffleActivity.getState())
+                  .state(ActivityStateVO.valueOf(raffleActivity.getState()))
                   .build();
          redisService.setValue(cacheKey, activityEntity);
          return activityEntity;
@@ -153,5 +159,46 @@ public class ActivityRepository implements IActivityRepository {
             dbRouterStrategy.clear();
         }
 
+    }
+
+    @Override
+    public void storeActivitySku(String key, Integer raffleActivitySkuEntity) {
+        if (redisService.isExists(key)) return;
+        redisService.setValue(key,raffleActivitySkuEntity);
+    }
+
+    @Override
+    public Boolean substractionSkuStock(String cacheKey) {
+        long surplus = redisService.decr(cacheKey);
+        if(surplus < 0){
+            redisService.setAtomicLong(cacheKey, 0);
+            return false;
+        }
+        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
+        // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
+        String lockKey = cacheKey + Constants.UNDERLINE + surplus;
+        Boolean lock = redisService.setNx(lockKey);
+        if(!lock) log.info("Sku库存扣减失败 {}",lockKey);
+        return lock;
+    }
+
+    @Override
+    public void awardSkuStockConsumeSendQueue(ActivitySkuVO activitySkuVO) {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        delayedQueue.offer(activitySkuVO,3, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public ActivitySkuVO takeQueueValue() {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+        RBlockingQueue<ActivitySkuVO> targetQueue = redisService.getBlockingQueue(cacheKey);
+        return targetQueue.poll();
+    }
+
+    @Override
+    public void updateSkuStock(Long sku, Long activityId) {
+        skuDao.updateSkuStock(sku);
     }
 }
