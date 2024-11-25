@@ -8,17 +8,14 @@ import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 import io.github.jasonxqh.domain.strategy.service.AbstractRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.IRaffleAward;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStock;
-import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.ILogicChain;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
-import io.github.jasonxqh.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -73,6 +70,16 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
     @Override
     public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
         strategyRepository.updateStrategyAwardStock( strategyId,  awardId);
+    }
+
+    @Override
+    public void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity) {
+        strategyRepository.clearStrategyAwardStock(strategyAwardEntity );
+    }
+
+    @Override
+    public void clearQueueValue() {
+        strategyRepository.clearQueueValue();
     }
 
     @Override

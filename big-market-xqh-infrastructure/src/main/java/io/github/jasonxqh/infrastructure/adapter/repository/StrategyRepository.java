@@ -1,12 +1,14 @@
 package io.github.jasonxqh.infrastructure.adapter.repository;
 
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
+import io.github.jasonxqh.domain.strategy.event.StrategyAwardStockZeroMessageEvent;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.*;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.strategy.*;
+import io.github.jasonxqh.infrastructure.event.EventPublisher;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
 import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.exception.AppException;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -54,6 +57,12 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Resource
     private IRuleTreeNodeLineDao ruleTreeNodeLineDao;
+
+    @Autowired
+    private EventPublisher eventPublisher;
+
+    @Autowired
+    private StrategyAwardStockZeroMessageEvent awardStockZeroMessageEvent;
 
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -231,14 +240,17 @@ public class StrategyRepository implements IStrategyRepository {
     }
 
     @Override
-    public Boolean subtractAwardStock(String cacheKey) {
+    public Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY+strategyAwardEntity.getStrategyId() + "_" + strategyAwardEntity.getAwardId();
         long surplus = redisService.decr(cacheKey);
-        if(surplus < 0){
+        if(surplus == 0L){
+            //发送mq消息,需要新建一个交换机
+            eventPublisher.publish(awardStockZeroMessageEvent.getTopic(), awardStockZeroMessageEvent.buildEventMessage(strategyAwardEntity));
+            return false;
+        }else if(surplus < 0){
             redisService.setAtomicLong(cacheKey, 0);
             return false;
         }
-        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
-        // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         Boolean lock = redisService.setNx(lockKey);
         if(!lock) log.info("策略奖品库存加锁失败 {}",lockKey);
@@ -258,8 +270,6 @@ public class StrategyRepository implements IStrategyRepository {
     public StrategyAwardStockKeyVO takeQueueValue() {
         String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
         RBlockingQueue<StrategyAwardStockKeyVO> destinationQueue = redisService.getBlockingQueue(cacheKey);
-//        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(destinationQueue);
-        //看看会发生什么？
         return destinationQueue.poll();
     }
 
@@ -295,6 +305,23 @@ public class StrategyRepository implements IStrategyRepository {
         // 缓存结果
         redisService.setValue(cacheKey, strategyAwardEntity);
         return strategyAwardEntity;
+    }
+
+    @Override
+    public void clearStrategyAwardStock(StrategyAwardEntity  strategyAwardEntity) {
+        StrategyAward strategyAward = new StrategyAward();
+        strategyAward.setStrategyId(strategyAwardEntity.getStrategyId());
+        strategyAward.setAwardId(strategyAwardEntity.getAwardId());
+        strategyAwardDao.clearQueueValue(strategyAward);
+    }
+
+    @Override
+    public void clearQueueValue() {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY;
+        RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = redisService.getBlockingQueue(cacheKey);
+        RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(blockingQueue);
+        blockingQueue.clear();
+        delayedQueue.clear();
     }
 
 }

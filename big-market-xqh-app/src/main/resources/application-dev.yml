@@ -25,6 +25,7 @@ spring:
         prefetch: 1 # 每次投递n个消息，消费完在投递n个
     topic:
       activity_sku_stock_zero: activity_sku_stock_zero
+      strategy_award_stock_zero: strategy_award_stock_zero
 
 # 分库分表配置：
 mini-db-router:

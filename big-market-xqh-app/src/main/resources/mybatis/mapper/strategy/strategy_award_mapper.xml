@@ -71,4 +71,10 @@
           AND award_count_surplus > 0
     </update>
 
+    <update id="clearQueueValue" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyAward">
+        update strategy_award
+        set award_count_surplus = 0,update_time = now()
+        where award_id = #{awardId}
+        and strategy_id = #{strategyId}
+    </update>
 </mapper>

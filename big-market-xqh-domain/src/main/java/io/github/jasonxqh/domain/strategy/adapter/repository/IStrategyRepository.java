@@ -41,7 +41,7 @@ public interface IStrategyRepository {
 
     void cacheStrategyAwardCount(String cacheKey, Integer awardCount);
 
-    Boolean subtractAwardStock(String cacheKey);
+    Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity);
 
     void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 
@@ -50,4 +50,8 @@ public interface IStrategyRepository {
     void updateStrategyAwardStock(Long strategyId, Integer awardId);
 
     StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId);
+
+    void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity);
+
+    void clearQueueValue();
 }

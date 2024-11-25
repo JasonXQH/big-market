@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.strategy.service;
 
+import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 
 /**
@@ -14,4 +15,8 @@ public interface IRaffleStock {
 
     //更新奖品库存消耗记录
     void updateStrategyAwardStock(Long strategyId,Integer awardId);
+
+    void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity);
+
+    void clearQueueValue();
 }

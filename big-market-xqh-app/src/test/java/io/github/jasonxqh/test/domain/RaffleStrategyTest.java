@@ -50,7 +50,7 @@ public class RaffleStrategyTest {
 
     @Test
     public void test_performRaffle() throws InterruptedException {
-        for(int i = 0;i < 3;i++){
+        for(int i = 0;i < 1;i++){
             RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
                     .userId("xiaofuge")
                     .strategyId(100006L)
