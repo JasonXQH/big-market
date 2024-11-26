@@ -63,7 +63,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
 
 
     @Override
-    public StrategyAwardStockKeyVO takeQueueValue() throws InterruptedException {
+    public List<StrategyAwardStockKeyVO> takeQueueValues() throws InterruptedException {
         return strategyRepository.takeQueueValue();
     }
 
@@ -73,13 +73,13 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
     }
 
     @Override
-    public void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity) {
-        strategyRepository.clearStrategyAwardStock(strategyAwardEntity );
+    public void clearStrategyAwardStock(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
+        strategyRepository.clearStrategyAwardStock(strategyAwardStockKeyVO);
     }
 
     @Override
-    public void clearQueueValue() {
-        strategyRepository.clearQueueValue();
+    public void clearQueueValue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
+        strategyRepository.clearQueueValue(strategyAwardStockKeyVO);
     }
 
     @Override

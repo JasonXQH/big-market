@@ -32,7 +32,6 @@ public class ActivitySkuStockZeroCustomer {
 
     @RabbitListener(queuesToDeclare = @Queue(value = "activity_sku_stock_zero"))
     public void listener(String message) {
-        log.info("监听活动sku库存消耗为0消息 topic: {} message: {}", topic, message);
         try {
             log.info("监听活动sku库存消耗为0消息 topic: {} message: {}", topic, message);
             // 转换对象

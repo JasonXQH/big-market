@@ -2,7 +2,6 @@ package io.github.jasonxqh.infrastructure.dao;
 
 import io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyAward;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -25,5 +24,5 @@ public interface IStrategyAwardDao {
 
     StrategyAward queryStrategyAward(StrategyAward strategyAward);
 
-    void clearQueueValue(StrategyAward strategyAward);
+    void clearStrategyAwardStock(StrategyAward strategyAward);
 }

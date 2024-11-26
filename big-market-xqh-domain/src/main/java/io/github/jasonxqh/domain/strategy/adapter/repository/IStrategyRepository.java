@@ -45,13 +45,15 @@ public interface IStrategyRepository {
 
     void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 
-    StrategyAwardStockKeyVO takeQueueValue();
+    List<StrategyAwardStockKeyVO> takeQueueValue();
+
+//    StrategyAwardStockKeyVO takeQueueValue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 
     void updateStrategyAwardStock(Long strategyId, Integer awardId);
 
     StrategyAwardEntity queryStrategyAwardEntity(Long strategyId, Integer awardId);
 
-    void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity);
+    void clearStrategyAwardStock(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 
-    void clearQueueValue();
+    void clearQueueValue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 }

@@ -1,7 +1,8 @@
 package io.github.jasonxqh.domain.strategy.service;
 
-import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
+
+import java.util.List;
 
 /**
  * @author : jasonxu
@@ -11,12 +12,12 @@ import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
  **/
 public interface IRaffleStock {
     //获取奖品库存消耗队列
-    StrategyAwardStockKeyVO takeQueueValue() throws InterruptedException;
+    List<StrategyAwardStockKeyVO> takeQueueValues() throws InterruptedException;
 
     //更新奖品库存消耗记录
     void updateStrategyAwardStock(Long strategyId,Integer awardId);
 
-    void clearStrategyAwardStock(StrategyAwardEntity strategyAwardEntity);
+    void clearStrategyAwardStock(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 
-    void clearQueueValue();
+    void clearQueueValue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
 }
