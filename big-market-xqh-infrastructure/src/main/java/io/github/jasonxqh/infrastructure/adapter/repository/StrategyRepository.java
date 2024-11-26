@@ -58,10 +58,10 @@ public class StrategyRepository implements IStrategyRepository {
     @Resource
     private IRuleTreeNodeLineDao ruleTreeNodeLineDao;
 
-    @Autowired
+    @Resource
     private EventPublisher eventPublisher;
 
-    @Autowired
+    @Resource
     private StrategyAwardStockZeroMessageEvent awardStockZeroMessageEvent;
 
     @Override
@@ -246,7 +246,7 @@ public class StrategyRepository implements IStrategyRepository {
         if(surplus == 0L){
             //发送mq消息,需要新建一个交换机
             eventPublisher.publish(awardStockZeroMessageEvent.getTopic(), awardStockZeroMessageEvent.buildEventMessage(strategyAwardEntity));
-            return false;
+            return true;
         }else if(surplus < 0){
             redisService.setAtomicLong(cacheKey, 0);
             return false;

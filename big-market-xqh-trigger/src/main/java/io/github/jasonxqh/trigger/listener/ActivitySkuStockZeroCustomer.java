@@ -30,14 +30,9 @@ public class ActivitySkuStockZeroCustomer {
     @Resource
     private ISkuStock skuStock;
 
-    @RabbitListener(
-            bindings = @QueueBinding(
-                    value = @Queue(value = "activity_sku_stock_zero_queue", durable = "true"),
-                    exchange = @Exchange(value = "activity_sku_stock_zero_exchange"),
-                    key = "activity_sku_stock_zero"
-            )
-    )
+    @RabbitListener(queuesToDeclare = @Queue(value = "activity_sku_stock_zero"))
     public void listener(String message) {
+        log.info("监听活动sku库存消耗为0消息 topic: {} message: {}", topic, message);
         try {
             log.info("监听活动sku库存消耗为0消息 topic: {} message: {}", topic, message);
             // 转换对象
@@ -53,5 +48,5 @@ public class ActivitySkuStockZeroCustomer {
             throw e;
         }
     }
-
 }
+
