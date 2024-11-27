@@ -13,4 +13,27 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
 
+  <insert id="insertActivityAccountMonth" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountMonth">
+    insert into raffle_activity_account_month
+    (user_id, activity_id,month, month_count, month_count_surplus, create_time, update_time)
+    values
+    (#{userId}, #{activityId}, #{month}, #{monthCount}, #{monthCountSurplus}, now(), now())
+  </insert>
+
+  <update id="updateActivityAccountMonthSubstractionQuota" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountMonth">
+    update raffle_activity_account_month
+    set update_time = now(),
+        month_count_surplus = month_count_surplus - 1
+    where activity_id = #{activityId} and user_id = #{userId} and month = #{month}
+    and month_count_surplus > 0
+  </update>
+
+  <select id="queryActivityAccountMonthByUserId"
+          parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountMonth"
+         resultMap="BaseResultMap"
+  >
+    select user_id, activity_id,month, month_count, month_count_surplus
+    from raffle_activity_account_month
+    where activity_id = #{activityId} and user_id = #{userId} and month = #{month}
+  </select>
 </mapper>

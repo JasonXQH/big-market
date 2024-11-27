@@ -1,6 +1,6 @@
-package io.github.jasonxqh.domain.activity.service.rule.chain.factory;
+package io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory;
 
-import io.github.jasonxqh.domain.activity.service.rule.chain.IActionChain;
+import io.github.jasonxqh.domain.activity.service.quota.rule.chain.IActionChain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.stereotype.Service;

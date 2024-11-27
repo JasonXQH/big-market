@@ -1,11 +1,11 @@
-package io.github.jasonxqh.domain.activity.service.rule.chain.impl;
+package io.github.jasonxqh.domain.activity.service.quota.rule.chain.impl;
 
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
-import io.github.jasonxqh.domain.activity.service.rule.chain.AbstractActionChain;
-import io.github.jasonxqh.domain.activity.service.rule.chain.factory.DefaultActionChainFactory;
+import io.github.jasonxqh.domain.activity.service.quota.rule.chain.AbstractActionChain;
+import io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory.DefaultActionChainFactory;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;

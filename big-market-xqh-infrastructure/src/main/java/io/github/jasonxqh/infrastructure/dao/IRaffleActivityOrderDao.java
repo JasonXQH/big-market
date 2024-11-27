@@ -1,6 +1,8 @@
 package io.github.jasonxqh.infrastructure.dao;
 import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import cn.bugstack.middleware.db.router.annotation.DBRouterStrategy;
+import io.github.jasonxqh.domain.activity.model.entity.PartakeRaffleActivityEntity;
+import io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity;
 import io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityOrder;
 import org.apache.ibatis.annotations.Mapper;
 

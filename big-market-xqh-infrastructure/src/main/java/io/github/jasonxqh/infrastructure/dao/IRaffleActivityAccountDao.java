@@ -1,5 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -8,4 +9,13 @@ public interface IRaffleActivityAccountDao {
     int updateAccountQuota(RaffleActivityAccount rafleActivityAccount);
 
     void insert(RaffleActivityAccount raffleActivityAccount);
+
+    @DBRouter
+    RaffleActivityAccount queryActivityAccountByUserId(RaffleActivityAccount account);
+
+    int updateActivityAccountSubstractionQuota(RaffleActivityAccount build);
+
+    void updateActivityAccountMonthSurplusImageQuota(RaffleActivityAccount build);
+
+    void updateActivityAccountDaySurplusImageQuota(RaffleActivityAccount build);
 }

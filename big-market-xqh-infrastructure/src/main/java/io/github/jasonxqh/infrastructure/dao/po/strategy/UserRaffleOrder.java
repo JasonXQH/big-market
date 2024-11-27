@@ -1,12 +1,19 @@
 package io.github.jasonxqh.infrastructure.dao.po.strategy;
 
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户抽奖订单表
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRaffleOrder {
     private Integer id;
 

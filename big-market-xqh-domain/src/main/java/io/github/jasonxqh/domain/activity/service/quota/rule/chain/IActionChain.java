@@ -1,4 +1,4 @@
-package io.github.jasonxqh.domain.activity.service.rule.chain;
+package io.github.jasonxqh.domain.activity.service.quota.rule.chain;
 
 
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;

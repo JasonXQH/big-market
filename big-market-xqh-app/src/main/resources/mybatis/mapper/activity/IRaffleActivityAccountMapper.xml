@@ -35,4 +35,40 @@
       update_time = now()
       where user_id = #{userId} and activity_id = #{activityId}
     </update>
+
+  <select id="queryActivityAccountByUserId" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount" resultMap="BaseResultMap">
+    select
+      user_id, activity_id, total_count, total_count_surplus, day_count,
+      day_count_surplus, month_count, month_count_surplus, create_time, update_time
+    from raffle_activity_account
+    where user_id = #{userId}
+    and activity_id = #{activityId}
+    </select>
+
+  <update id="updateActivityAccountSubstractionQuota" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount">
+    update raffle_activity_account
+    set
+    total_count_surplus = total_count_surplus - 1 ,
+    day_count_surplus = day_count_surplus - 1 ,
+    month_count_surplus = month_count_surplus - 1 ,
+    update_time = now()
+    where user_id = #{userId} and activity_id = #{activityId}
+    and total_count_surplus > 0
+    and day_count_surplus > 0
+    and month_count_surplus > 0
+  </update>
+
+  <update id="updateActivityAccountMonthSurplusImageQuota" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount">
+    update raffle_activity_account
+    set month_count_surplus = #{monthCountSurplus} - 1, update_time = now()
+    where user_id = #{userId} and activity_id = #{activityId}
+    and month_count_surplus > 0
+  </update>
+
+  <update id="updateActivityAccountDaySurplusImageQuota" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount">
+    update raffle_activity_account
+    set day_count_surplus = #{dayCountSurplus} - 1, update_time = now()
+    where user_id = #{userId} and activity_id = #{activityId}
+    and day_count_surplus > 0
+  </update>
 </mapper>

@@ -1,10 +1,9 @@
 package io.github.jasonxqh.domain.activity.adapter.repository;
 
 
-import io.github.jasonxqh.domain.activity.model.aggregate.CreateOrderAggregate;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityEntity;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
+import io.github.jasonxqh.domain.activity.model.aggregate.CreatePartakeOrderAggregate;
+import io.github.jasonxqh.domain.activity.model.aggregate.CreateSkuQuotaOrderAggregate;
+import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 
 import java.util.Date;
@@ -18,7 +17,7 @@ public interface IActivityRepository {
 
     RaffleActivityCountEntity queryRaffleActivityCountByActivityCountId(Long activityCountId);
 
-    void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+    void doSaveSkuQuotaOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
 
     void storeActivitySkuStockCount(String key, Integer skuCount);
 
@@ -34,4 +33,14 @@ public interface IActivityRepository {
     void clearQueueValue();
 
     void clearActivitySkuStock(Long sku);
+
+    UserRaffleOrderEntity queryUnusedRaffleOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity);
+
+    RaffleActivityAccountEntity queryActivityAccountByUserId(String userId, Long activityId);
+
+    RaffleActivityAccountMonthEntity queryActivityAccountMonthByUserId(String userId, Long activityId, String month);
+
+    RaffleActivityAccountDayEntity queryActivityAccountDayByUserId(String userId, Long activityId, String month);
+
+    void doSavePartakeOrder(CreatePartakeOrderAggregate partakeOrderAggregate);
 }

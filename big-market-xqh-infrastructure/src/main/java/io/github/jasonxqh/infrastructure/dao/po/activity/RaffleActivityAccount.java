@@ -1,12 +1,19 @@
 package io.github.jasonxqh.infrastructure.dao.po.activity;
 
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 抽奖活动账户表
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RaffleActivityAccount {
     /**
     * 自增ID

@@ -1,16 +1,16 @@
-package io.github.jasonxqh.domain.activity.service;
+package io.github.jasonxqh.domain.activity.service.quota;
 
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityCountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
-import io.github.jasonxqh.domain.activity.service.rule.chain.factory.DefaultActionChainFactory;
+import io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory.DefaultActionChainFactory;
 
-public class RaffleActivitySupport {
+public class RaffleActivityAccountQuotaSupport {
     protected IActivityRepository activityRepository;
     protected DefaultActionChainFactory actionChainFactory;
 
-    public RaffleActivitySupport(IActivityRepository activityRepository,DefaultActionChainFactory actionChainFactory) {
+    public RaffleActivityAccountQuotaSupport(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory) {
         this.actionChainFactory = actionChainFactory;
         this.activityRepository = activityRepository;
     }
