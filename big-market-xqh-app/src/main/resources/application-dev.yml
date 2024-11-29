@@ -26,6 +26,7 @@ spring:
     topic:
       activity_sku_stock_zero: activity_sku_stock_zero
       strategy_award_stock_zero: strategy_award_stock_zero
+      send_award: send_award
 
 # 分库分表配置：
 mini-db-router:

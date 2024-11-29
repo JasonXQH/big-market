@@ -1,6 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao;
 
-import io.github.jasonxqh.infrastructure.dao.po.strategy.Award;
+import io.github.jasonxqh.infrastructure.dao.po.award.Award;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

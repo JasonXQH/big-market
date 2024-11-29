@@ -1,12 +1,15 @@
-package io.github.jasonxqh.infrastructure.dao.po.strategy;
+package io.github.jasonxqh.infrastructure.dao.po.award;
 
 import java.util.Date;
+
+import lombok.Builder;
 import lombok.Data;
 
 /**
  * 用户中奖记录表
  */
 @Data
+@Builder
 public class UserAwardRecord {
     /**
     * 自增ID

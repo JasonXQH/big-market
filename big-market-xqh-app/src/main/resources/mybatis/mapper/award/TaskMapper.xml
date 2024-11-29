@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jasonxqh.infrastructure.dao.ITaskDao">
+  <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.Task">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="topic" jdbcType="VARCHAR" property="topic" />
+    <result column="message_id" jdbcType="VARCHAR" property="messageId" />
+    <result column="message" jdbcType="VARCHAR" property="message" />
+    <result column="state" jdbcType="VARCHAR" property="state" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <insert id="saveTask" parameterType="io.github.jasonxqh.infrastructure.dao.po.Task">
+    insert into task
+    (user_id,topic,message_id,message,state,create_time,update_time)
+    values
+    (#{userId}, #{topic},#{messageId}, #{message}, #{state}, now(), now())
+  </insert>
+
+  <update id="updateTaskSendMessageFail" parameterType="io.github.jasonxqh.infrastructure.dao.po.Task">
+    update task
+    set update_time = now(),
+    state = 'fail'
+    where user_id = #{userId} and message_id = #{messageId}
+  </update>
+
+  <update id="updateTaskSendMessageCompleted" parameterType="io.github.jasonxqh.infrastructure.dao.po.Task">
+    update task
+    set update_time = now(),
+    state = 'completed'
+    where user_id = #{userId} and message_id = #{messageId}
+  </update>
+
+  <select id="queryNoSendMessageTaskList" resultMap="BaseResultMap">
+    select user_id,topic,message_id,message,state
+    from task
+    where state = 'fail' or (state = 'create' and now() - update_time > 6000)
+    limit 10
+  </select>
+
+</mapper>
