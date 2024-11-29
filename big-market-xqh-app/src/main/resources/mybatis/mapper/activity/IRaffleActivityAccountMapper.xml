@@ -39,7 +39,7 @@
   <select id="queryActivityAccountByUserId" parameterType="io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccount" resultMap="BaseResultMap">
     select
       user_id, activity_id, total_count, total_count_surplus, day_count,
-      day_count_surplus, month_count, month_count_surplus, create_time, update_time
+      day_count_surplus, month_count, month_count_surplus
     from raffle_activity_account
     where user_id = #{userId}
     and activity_id = #{activityId}

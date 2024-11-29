@@ -2,14 +2,18 @@ package io.github.jasonxqh.infrastructure.dao.po;
 
 import java.util.Date;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 任务表，发送MQ
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Task {
     /**
      * 自增ID

@@ -14,7 +14,6 @@ public class SendAwardMessageEvent extends BaseEvent<SendAwardMessageEvent.SendA
     @Value("${spring.rabbitmq.topic.send_award}")
     private String topic;
 
-
     @Override
     public EventMessage<SendAwardMessage> buildEventMessage(SendAwardMessage data) {
         return EventMessage.<SendAwardMessage>builder()

@@ -22,10 +22,10 @@ public class SendAwardCustomer {
     public void listener(String message) {
         try {
             log.info("监听用户中奖记录消息 topic: {} message: {}", topic, message);
-            // 转换对象
-            BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage> eventMessage = JSON.parseObject(message, new TypeReference<BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage>>() {
-            }.getType());
-            SendAwardMessageEvent.SendAwardMessage data = eventMessage.getData();
+//            // 转换对象
+//            BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage> eventMessage = JSON.parseObject(message, new TypeReference<BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage>>() {
+//            }.getType());
+//            SendAwardMessageEvent.SendAwardMessage data = eventMessage.getData();
 
         } catch (Exception e) {
             log.error("监听用户奖品发送消息，消费失败 topic: {} message: {}", topic, message);

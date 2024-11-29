@@ -28,7 +28,7 @@
                 award_count_surplus,
                 award_rate,
                 rule_models,
-                sort,
+                sort
         FROM strategy_award
         WHERE strategy_id = #{strategyId};
     </select>

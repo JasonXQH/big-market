@@ -31,11 +31,30 @@ public class SendMessageTaskJob {
         try {
             // 获取分库数量
             int dbCount = dbRouter.dbCount();
-            log.info("dbCount: {}", dbCount);
-            dbRouter.setDBKey(1);
-            dbRouter.setTBKey(0);
-            List<TaskEntity> taskEntities = taskService.queryNoSendMessageTaskList();
-            log.info("测试结果:{}", taskEntities.size());
+            for(int dbIdx = 1 ; dbIdx <= dbCount ; dbIdx++){
+                int findDbIdx = dbIdx;
+                threadPoolExecutor.execute(() -> {
+                    try {
+                        dbRouter.setDBKey(findDbIdx);
+                        dbRouter.setTBKey(0);
+                        List<TaskEntity> taskEntities = taskService.queryNoSendMessageTaskList();
+                        for(TaskEntity taskEntity : taskEntities){
+                            threadPoolExecutor.execute(() -> {
+                                try {
+                                    taskService.sendMessage(taskEntity);
+                                    taskService.updateTaskSendMessageCompleted(taskEntity.getUserId(),taskEntity.getMessageId());
+                                }catch (Exception e){
+                                    log.error("定时任务，发送MQ消息失败 userId:{} topic:{}", taskEntity.getUserId(), taskEntity.getTopic());
+                                    taskService.updateTaskSendMessageFail(taskEntity.getUserId(),taskEntity.getMessageId());
+                                }
+                            });
+                        }
+
+                    } finally {
+                        dbRouter.clear();
+                    }
+                });
+            }
 
         } catch (Exception e) {
             log.error("定时任务，扫描MQ任务表，发送消息失败。",e);
