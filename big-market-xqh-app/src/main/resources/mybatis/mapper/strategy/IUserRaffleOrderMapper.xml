@@ -14,12 +14,12 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
 
-  <select id="queryUnusedUserRaffleOrder" parameterType="io.github.jasonxqh.domain.activity.model.entity.PartakeRaffleActivityEntity"
-          resultType="io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity">
+  <select id="queryUnusedUserRaffleOrder" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder"
+          resultMap="BaseResultMap">
     select user_id, activity_id, activity_name, strategy_id, order_id, order_time, order_state
     from user_raffle_order
     where user_id = #{userId} and activity_id = #{activityId} and order_state = 'create'
-
+    limit 1
   </select>
 
   <insert id="insertUserRaffleOrder" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder">
@@ -28,4 +28,10 @@
     values
     (#{userId}, #{activityId}, #{activityName}, #{strategyId}, #{orderId}, #{orderTime}, #{orderState}, now(), now())
   </insert>
+
+  <update id="updateUserRaffleOrderStateUsed" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder">
+    update user_raffle_order
+    set order_state = 'used' , update_time = now()
+    where user_id = #{userId} and order_id = #{orderId} and order_state = 'create'
+  </update>
 </mapper>

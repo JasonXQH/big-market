@@ -9,6 +9,7 @@ import io.github.jasonxqh.domain.activity.model.aggregate.CreateSkuQuotaOrderAgg
 import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
+import io.github.jasonxqh.domain.activity.model.valobj.UserRaffleOrderStateVO;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.activity.*;
 import io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder;
@@ -25,8 +26,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -247,7 +251,23 @@ public class ActivityRepository implements IActivityRepository {
 
     @Override
     public UserRaffleOrderEntity queryUnusedRaffleOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity) {
-        return userRaffleOrderDao.queryUnusedUserRaffleOrder(partakeRaffleActivityEntity);
+
+        // 查询数据
+        UserRaffleOrder userRaffleOrderReq = new UserRaffleOrder();
+        userRaffleOrderReq.setUserId(partakeRaffleActivityEntity.getUserId());
+        userRaffleOrderReq.setActivityId(partakeRaffleActivityEntity.getActivityId());
+
+        UserRaffleOrder userRaffleOrderRes = userRaffleOrderDao.queryUnusedUserRaffleOrder(userRaffleOrderReq);
+        if (null == userRaffleOrderRes) return null;
+        return UserRaffleOrderEntity.builder()
+                  .userId(userRaffleOrderRes.getUserId())
+                  .activityId(userRaffleOrderRes.getActivityId())
+                  .activityName(userRaffleOrderRes.getActivityName())
+                  .strategyId(userRaffleOrderRes.getStrategyId())
+                  .orderId(userRaffleOrderRes.getOrderId())
+                  .orderTime(userRaffleOrderRes.getOrderTime())
+                  .orderState(UserRaffleOrderStateVO.valueOf(userRaffleOrderRes.getOrderState()))
+                  .build();
     }
 
     @Override
@@ -412,6 +432,27 @@ public class ActivityRepository implements IActivityRepository {
         }finally {
             routerStrategy.clear();
         }
+    }
+
+    @Override
+    public List<RaffleActivitySkuEntity> queryActivitySkuByActivityId(Long activityId) {
+        List<RaffleActivitySku> raffleActivitySkus = skuDao.queryActivitySkuByActivityId(activityId);
+        return raffleActivitySkus.stream()
+                .map(raffleActivitySku -> RaffleActivitySkuEntity.builder()
+                                            .activityId(activityId)
+                                            .activityCountId(raffleActivitySku.getActivityCountId())
+                                            .sku(raffleActivitySku.getSku())
+                                            .stockCount(raffleActivitySku.getStockCount())
+                                            .stockCountSurplus(raffleActivitySku.getStockCountSurplus())
+                                            .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void cacheActivitySkuStockCount(String cacheKey, Integer stockCount) {
+        if (redisService.isExists(cacheKey)) return;
+        redisService.setAtomicLong(cacheKey, stockCount);
     }
 
     private static UserRaffleOrder getUserRaffleOrder(CreatePartakeOrderAggregate partakeOrderAggregate) {

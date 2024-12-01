@@ -33,4 +33,14 @@
       set stock_count_surplus = 0,update_time = now()
       where sku = #{sku}
     </update>
+
+  <select id="queryActivitySkuByActivityId"   parameterType="java.lang.Long" resultMap="BaseResultMap">
+      SELECT  sku,
+              activity_id,
+              activity_count_id,
+              stock_count,
+              stock_count_surplus
+      FROM raffle_activity_sku
+      WHERE activity_id = #{activityId}
+  </select>
 </mapper>

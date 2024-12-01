@@ -8,8 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AwardStateVO {
     //create-创建、completed-发奖完成
-    completed("completed", "发奖完成"),
-    create("create","创建")
+    create("create", "创建"),
+    complete("complete", "发奖完成"),
+    fail("fail", "发奖失败"),
     ;
 
     private final String code;

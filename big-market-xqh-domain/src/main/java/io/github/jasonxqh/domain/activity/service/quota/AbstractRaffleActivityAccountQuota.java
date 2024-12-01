@@ -54,8 +54,9 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         RaffleActivityCountEntity countEntity = queryActivityCount(raffleActivitySkuEntity.getActivityCountId());
         //3.责任链校验
         IActionChain actionChain = actionChainFactory.openLogicChain();
+        //检验成功，则会扣减activity的sku库存，防止超卖(超卖次数)
         boolean success = actionChain.action(raffleActivitySkuEntity, activityEntity, countEntity);
-        //4.构建抽奖单聚合对象
+        //4.构建抽奖单聚合对象，增加用户的抽奖次数。
         CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate = buildOrderAggregate(skuRechargeEntity, raffleActivitySkuEntity, activityEntity, countEntity);
         //5.保存抽奖单
         doSaveOrder(createSkuQuotaOrderAggregate);

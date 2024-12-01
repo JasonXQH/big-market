@@ -8,8 +8,10 @@ import io.github.jasonxqh.domain.award.model.entity.TaskEntity;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
 import io.github.jasonxqh.infrastructure.dao.ITaskDao;
 import io.github.jasonxqh.infrastructure.dao.IUserAwardRecordDao;
+import io.github.jasonxqh.infrastructure.dao.IUserRaffleOrderDao;
 import io.github.jasonxqh.infrastructure.dao.po.Task;
 import io.github.jasonxqh.infrastructure.dao.po.award.UserAwardRecord;
+import io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder;
 import io.github.jasonxqh.infrastructure.event.EventPublisher;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
@@ -28,12 +30,13 @@ public class AwardRepository implements IAwardRepository {
     private IUserAwardRecordDao userAwardRecordDao;
     @Resource
     private ITaskDao taskDao;
+
+    @Resource
+    private IUserRaffleOrderDao userRaffleOrderDao;
     @Resource
     private IDBRouterStrategy routerStrategy;
-
     @Resource
     private TransactionTemplate transactionTemplate;
-
     @Resource
     private EventPublisher eventPublisher;
 
@@ -64,13 +67,29 @@ public class AwardRepository implements IAwardRepository {
                 .message(JSON.toJSONString(taskEntity.getMessage()))
                 .state(taskEntity.getState().getCode())
                 .build();
+
+        UserRaffleOrder userRaffleOrderReq = UserRaffleOrder.builder()
+                .userId(userId)
+                .activityId(activityId)
+                .orderId(userAwardRecordEntity.getOrderId())
+                .build();
         try{
             routerStrategy.doRouter(userId);
             //编程式事务
             transactionTemplate.execute(status -> {
                 try{
+                    //写入记录
                     userAwardRecordDao.saveUserAwardRecord(record);
+                    //写入任务
                     taskDao.saveTask(task);
+                    //更新抽奖单
+                    int count = userRaffleOrderDao.updateUserRaffleOrderStateUsed(userRaffleOrderReq);
+                    if( 1 != count ) {
+                        //回滚操作
+                        status.setRollbackOnly();
+                        log.error("写入中奖记录，用户抽奖单已使用过,userId:{},activityId:{},orderId:{}",userId,activityId,userRaffleOrderReq.getOrderId());
+                        throw new AppException(ResponseCode.ACTIVITY_RAFFLE_ORDER_ERROR.getCode(),ResponseCode.ACTIVITY_RAFFLE_ORDER_ERROR.getCode());
+                    }
                     return 1;
                 }catch (DuplicateKeyException e){
                     status.setRollbackOnly();

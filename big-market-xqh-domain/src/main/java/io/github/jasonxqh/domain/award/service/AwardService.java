@@ -29,7 +29,6 @@ public  class AwardService implements IAwardService {
         if(userId == null || activityId == null || awardId == null) {
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(),ResponseCode.ILLEGAL_PARAMETER.getInfo());
         }
-
         // 构建消息对象
         SendAwardMessageEvent.SendAwardMessage sendAwardMessage = new SendAwardMessageEvent.SendAwardMessage();
         sendAwardMessage.setUserId(userAwardRecordEntity.getUserId());

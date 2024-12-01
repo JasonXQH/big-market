@@ -9,6 +9,7 @@ import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.*;
 import io.github.jasonxqh.infrastructure.adapter.support.QueueManager;
 import io.github.jasonxqh.infrastructure.dao.*;
+import io.github.jasonxqh.infrastructure.dao.po.activity.RaffleActivityAccountDay;
 import io.github.jasonxqh.infrastructure.dao.po.strategy.*;
 import io.github.jasonxqh.infrastructure.event.EventPublisher;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
@@ -37,11 +38,13 @@ import static io.github.jasonxqh.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_
 @Repository
 public class StrategyRepository implements IStrategyRepository {
     @Resource
+    private IRaffleActivityDao raffleActivityDao;
+    @Resource
     private IStrategyAwardDao strategyAwardDao;
-
     @Resource
     private IStrategyDao strategyDao;
-
+    @Resource
+    private IRaffleActivityAccountDayDao raffleActivityAccountDayDao;
 
     @Resource
     private IStrategyRuleDao strategyRuleDao;
@@ -333,6 +336,27 @@ public class StrategyRepository implements IStrategyRepository {
         RDelayedQueue<StrategyAwardStockKeyVO> delayedQueue = redisService.getDelayedQueue(blockingQueue);
         blockingQueue.clear();
         delayedQueue.clear();
+    }
+
+    @Override
+    public Long queryStrategyIdByActivityId(Long activityId) {
+        return raffleActivityDao.queryStrategyIdByActivityId(activityId);
+
+    }
+
+    @Override
+    public Integer queryTodayUserRaffleCount(String userId, Long strategyId) {
+        //根据strategyId获得activityId
+        Long activityId =  raffleActivityDao.queryActivityIdByStrategyId(strategyId);
+        //根据activityId和userId获得account
+        RaffleActivityAccountDay raffleActivityAccountDayReq = new RaffleActivityAccountDay();
+        raffleActivityAccountDayReq.setUserId(userId);
+        raffleActivityAccountDayReq.setActivityId(activityId);
+        raffleActivityAccountDayReq.setDay(raffleActivityAccountDayReq.currentDay());
+        RaffleActivityAccountDay raffleActivityAccountDay = raffleActivityAccountDayDao.queryActivityAccountDayByUserId(raffleActivityAccountDayReq);
+        if (null == raffleActivityAccountDay) return 0;
+        // 总次数 - 剩余的，等于今日参与的
+        return raffleActivityAccountDay.getDayCount() - raffleActivityAccountDay.getDayCountSurplus();
     }
 
 }

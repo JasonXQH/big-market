@@ -2,8 +2,8 @@ package io.github.jasonxqh.api;
 
 import io.github.jasonxqh.api.dto.RaffleAwardListRequestDTO;
 import io.github.jasonxqh.api.dto.RaffleAwardListResponseDTO;
-import io.github.jasonxqh.api.dto.RaffleRequestDTO;
-import io.github.jasonxqh.api.dto.RaffleResponseDTO;
+import io.github.jasonxqh.api.dto.RaffleStrategyRequestDTO;
+import io.github.jasonxqh.api.dto.RaffleStrategyResponseDTO;
 import io.github.jasonxqh.api.response.Response;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
  * @created : 2024/11/17, 星期日
  * @Description :
  **/
-public interface IRaffleService {
+public interface IRaffleStrategyService {
     //策略装配接口
     Response<Boolean> strategyArmory(Long strategyId);
 
     Response<List<RaffleAwardListResponseDTO>> queryStrategyAwardList(RaffleAwardListRequestDTO requestDTO);
-    Response<RaffleResponseDTO> randomRaffle(RaffleRequestDTO requestDTO);
+    Response<RaffleStrategyResponseDTO> randomRaffle(RaffleStrategyRequestDTO requestDTO);
 }

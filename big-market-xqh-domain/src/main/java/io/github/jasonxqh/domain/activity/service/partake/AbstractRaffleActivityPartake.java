@@ -89,6 +89,14 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         return userRaffleOrderEntity;
     }
 
+    @Override
+    public UserRaffleOrderEntity createOrder(Long activityId, String userId) {
+        return this.createOrder(PartakeRaffleActivityEntity.builder()
+                .activityId(activityId)
+                .userId(userId)
+                .build());
+    }
+
     protected abstract CreatePartakeOrderAggregate doFilterAccount(String userId, Long activityId, Date currentDate);
 
 //    protected abstract void doSavePartakeOrder(CreatePartakeOrderAggregate createPartakeOrderAggregate);

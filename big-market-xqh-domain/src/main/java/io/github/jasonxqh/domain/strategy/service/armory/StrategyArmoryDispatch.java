@@ -60,9 +60,13 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
             strategyAwardEntitiesClone.removeIf(entity -> !ruleWeightValues.contains(entity.getAwardId()));
             assembleLotteryStrategy(String.valueOf(strategyId).concat("_").concat(key), strategyAwardEntitiesClone);
         }
-
-
         return true;
+    }
+
+    @Override
+    public boolean assembleLotteryStrategyByActivityId(Long activityId) {
+        Long strategyId = repository.queryStrategyIdByActivityId(activityId);
+        return assembleLotteryStrategy(strategyId);
     }
 
     private void cacheStrategyCount(Long strategyId, Integer awardId, Integer awardCount) {
@@ -134,6 +138,5 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
                 .strategyId(strategyId)
                 .build();
         return repository.subtractAwardStock(strategyAward);
-
     }
 }

@@ -34,29 +34,28 @@ public class RuleStockLogicTreeNode implements ILogicTreeNode {
 
     @Override
     public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId,String ruleValue) {
-        log.info("规则过滤-库存扣减 userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);
+        log.info("决策树引擎 [规则过滤-库存扣减] userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);
         Boolean status = strategyDispatch.subtractionAwardStock(strategyId, awardId);
         // status 为true，库存扣减成功，否则失败
         //成功，则发送队列消息
         if(status){
             //写入延迟队列，延迟消费更新数据库记录
-            log.info("规则过滤-库存扣减成功，向队列发送消息 ");
+            log.info("规则树过滤-库存扣减成功，向队列发送消息 userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);
             strategyRepository.awardStockConsumeSendQueue( StrategyAwardStockKeyVO.builder()
                             .strategyId(strategyId)
                             .awardId(awardId)
                             .build());
-
             return DefaultTreeFactory.TreeActionEntity.builder()
-                    .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
+                    .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
                     .strategyAwardVO(DefaultTreeFactory.StrategyAwardVO.builder()
                             .awardId(awardId)
                             .awardRuleValue("")
                             .build())
                     .build();
         }
-        log.info("规则过滤-库存扣减失败，走兜底");
+        log.info("规则树过滤-库存扣减失败【接管】");
         return DefaultTreeFactory.TreeActionEntity.builder()
-                .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
+                .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
                 .build();
     }
 }

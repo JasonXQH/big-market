@@ -20,10 +20,13 @@ import javax.annotation.Resource;
 @Component("rule_lock")
 public class RuleLockLogicTreeNode implements ILogicTreeNode {
 
-    private Long userRaffleCount = 10L;
+    @Resource
+    private IStrategyRepository strategyRepository;
 
     @Override
     public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId,String ruleValue) {
+
+
         log.info("规则树过滤-次数锁节点 userId:{} strategyId:{} awardId:{}", userId, strategyId,awardId);
 
 
@@ -31,17 +34,22 @@ public class RuleLockLogicTreeNode implements ILogicTreeNode {
         try {
             raffleCount = Long.parseLong(ruleValue);
         }catch (NumberFormatException e){
-            throw new RuntimeException("规则过滤-次数锁异常 ruleValue: "+ruleValue+"配置不正确");
+            throw new RuntimeException("规则树过滤-次数锁异常 ruleValue: "+ruleValue+"配置不正确");
         }
-        //接管
-        if(raffleCount > userRaffleCount) {
+        //用策略ID匹配活动ID，根据活动ID得到账户抽奖次数
+        Integer userRaffleCount =  strategyRepository.queryTodayUserRaffleCount(userId,strategyId);
+
+        // 用户抽奖次数大于规则限定值，规则放行
+        if (userRaffleCount >= raffleCount) {
+            log.info("规则树过滤-次数锁【放行】 userId:{} strategyId:{} awardId:{} raffleCount:{} userRaffleCount:{}", userId, strategyId, awardId, raffleCount, userRaffleCount);
             return DefaultTreeFactory.TreeActionEntity.builder()
-                    .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
+                    .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
                     .build();
         }
-
+        log.info("规则过滤-次数锁【拦截】 userId:{} strategyId:{} awardId:{} raffleCount:{} userRaffleCount:{}", userId, strategyId, awardId, raffleCount, userRaffleCount);
+        // 用户抽奖次数小于规则限定值，规则拦截
         return DefaultTreeFactory.TreeActionEntity.builder()
-                .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.ALLOW)
+                .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
                 .build();
     }
 }

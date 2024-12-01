@@ -7,6 +7,7 @@ import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 
 import java.util.Date;
+import java.util.List;
 
 public interface IActivityRepository {
 
@@ -43,4 +44,8 @@ public interface IActivityRepository {
     RaffleActivityAccountDayEntity queryActivityAccountDayByUserId(String userId, Long activityId, String month);
 
     void doSavePartakeOrder(CreatePartakeOrderAggregate partakeOrderAggregate);
+
+    List<RaffleActivitySkuEntity> queryActivitySkuByActivityId(Long activityId);
+
+    void cacheActivitySkuStockCount(String cacheKey, Integer stockCount);
 }

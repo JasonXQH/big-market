@@ -48,10 +48,6 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
 
         }
         log.info("strategyAwardRuleModelVO.getRuleModels :{}", strategyAwardRuleModelVO.getRuleModels());
-//        if(!strategyAwardRuleModelVO.getRuleModels().equals("tree_lock")){
-//            log.info("被决策树拦截，返回");
-//            return DefaultTreeFactory.StrategyAwardVO.builder().awardId(awardId).build();
-//        }
         RuleTreeVO ruleTreeVO = strategyRepository.queryRuleTreeVOByTreeId(strategyAwardRuleModelVO.getRuleModels());
         if(null == ruleTreeVO) {
             throw new RuntimeException("存在抽奖策略配置的规则模型，但是未在库表中配置对应的规则树信息");
