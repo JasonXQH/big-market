@@ -33,4 +33,12 @@
   <select id="queryActivityIdByStrategyId" parameterType="java.lang.Long"   resultType="java.lang.Long">
       select activity_id from raffle_activity where strategy_id = #{strategyId}
     </select>
+
+  <select id="queryActivityExpiredTimeByActivityId" parameterType="java.lang.Long" resultType="java.sql.Date">
+      select end_date_time from raffle_activity where activity_id = #{activityId}
+    </select>
+
+    <select id="queryActivityExpiredTimeByStrategyId" parameterType="java.lang.Long" resultType="java.sql.Date">
+        select end_date_time from raffle_activity where strategy_id = #{strategyId}
+    </select>
 </mapper>

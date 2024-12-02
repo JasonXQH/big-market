@@ -12,6 +12,8 @@ import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -53,7 +55,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
             return buildRaffleAwardEntity(strategyId,chainStrategyAwardVO.getAwardId(),null);
         }
         //3. 规则树抽奖过滤
-        DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = raffleLogicTree(userId, strategyId,chainStrategyAwardVO.getAwardId());
+        DefaultTreeFactory.StrategyAwardVO treeStrategyAwardVO = raffleLogicTree(userId, strategyId,chainStrategyAwardVO.getAwardId(),raffleFactorEntity.getEndDateTime());
         log.info("抽奖策略计算-策略树 userId:{} 策略Id: {} 责任链抽到的奖品ID {} 奖品logicModel {}", userId, strategyId, chainStrategyAwardVO.getAwardId(), chainStrategyAwardVO.getLogicModel());
         // 4. 返回抽奖结果
         return buildRaffleAwardEntity(strategyId,treeStrategyAwardVO.getAwardId(),treeStrategyAwardVO.getAwardRuleValue());
@@ -70,7 +72,22 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
     }
     public abstract DefaultChainFactory.StrategyAwardVO raffleLogicChain(String userId,Long strategyId);
 
+    /**
+     * @param userId
+     * @param strategyId
+     * @param awardId
+     * @return {@link DefaultTreeFactory.StrategyAwardVO }
+     */
     public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId,Long strategyId,Integer awardId);
 
+
+    /**
+     * @param userId
+     * @param strategyId
+     * @param awardId
+     * @param endDateTime
+     * @return {@link DefaultTreeFactory.StrategyAwardVO }
+     */
+    public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId, Integer awardId, Date endDateTime);
 
 }

@@ -7,8 +7,12 @@ import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.ILogicTreeNode;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
+import io.github.jasonxqh.types.enums.ResponseCode;
+import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +36,12 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
 
 
     @Override
-    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId) {
+    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId, Date endDateTime) {
+        //校验参数
+        if(StringUtils.isBlank(userId)||strategyId==null||awardId==null) {
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(),ResponseCode.ILLEGAL_PARAMETER.getInfo());
+        }
+
         DefaultTreeFactory.StrategyAwardVO strategyAwardData = null;
 
         String nextNode = ruleTreeVO.getTreeRootRuleNode();
@@ -42,7 +51,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
         while(null != nextNode) {
             ILogicTreeNode logicTreeNode = logicTreeNodeGroup.get(ruleTreeNodeVO.getRuleKey());
             String ruleValue = ruleTreeNodeVO.getRuleValue();
-            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId,ruleValue);
+            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId,ruleValue,endDateTime);
 
             RuleLogicCheckTypeVO ruleLogicCheckTypeVO = logicEntity.getRuleLogicCheckTypeVO();
 

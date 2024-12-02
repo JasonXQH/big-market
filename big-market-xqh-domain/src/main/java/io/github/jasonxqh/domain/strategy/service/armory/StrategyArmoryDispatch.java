@@ -132,11 +132,11 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
     }
 
     @Override
-    public Boolean subtractionAwardStock(Long strategyId, Integer awardId) {
+    public Boolean subtractionAwardStock(Long strategyId, Integer awardId, Date endDateTime) {
         StrategyAwardEntity strategyAward =StrategyAwardEntity.builder()
                 .awardId(awardId)
                 .strategyId(strategyId)
                 .build();
-        return repository.subtractAwardStock(strategyAward);
+        return repository.subtractAwardStock(strategyAward,endDateTime);
     }
 }

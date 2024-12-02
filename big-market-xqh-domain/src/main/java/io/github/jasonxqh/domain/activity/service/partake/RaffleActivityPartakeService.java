@@ -22,7 +22,6 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
     private final SimpleDateFormat dateFormatMonth = new SimpleDateFormat("yyyy-MM");
     private final SimpleDateFormat dateFormatDay = new SimpleDateFormat("yyyy-MM-dd");
 
-
     protected RaffleActivityPartakeService(IActivityRepository activityRepository) {
         super(activityRepository);
     }

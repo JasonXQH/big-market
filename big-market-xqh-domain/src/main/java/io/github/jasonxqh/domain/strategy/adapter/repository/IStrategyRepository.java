@@ -7,8 +7,10 @@ import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : jasonxu
@@ -41,6 +43,7 @@ public interface IStrategyRepository {
 
     void cacheStrategyAwardCount(String cacheKey, Integer awardCount);
 
+    Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity, Date endDateTime);
     Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity);
 
     void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO);
@@ -60,4 +63,7 @@ public interface IStrategyRepository {
     Long queryStrategyIdByActivityId(Long activityId);
 
     Integer queryTodayUserRaffleCount(String userId, Long strategyId);
+
+
+    Map<String, Integer> queryAwardRuleLockCount(String[] treeIds);
 }

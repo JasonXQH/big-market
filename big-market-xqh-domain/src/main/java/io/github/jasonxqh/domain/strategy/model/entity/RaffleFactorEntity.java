@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -19,4 +21,6 @@ import lombok.NoArgsConstructor;
 public class RaffleFactorEntity {
     private String userId;
     private Long strategyId;
+
+    private Date endDateTime;
 }

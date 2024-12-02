@@ -105,7 +105,11 @@ public class ActivityRepository implements IActivityRepository {
                   .strategyId(raffleActivity.getStrategyId())
                   .state(ActivityStateVO.valueOf(raffleActivity.getState()))
                   .build();
-         redisService.setValue(cacheKey, activityEntity);
+        // 获取 endDateTime 的时间戳（单位：毫秒）
+        long endDateTime = raffleActivity.getEndDateTime().getTime();
+        long expireTimeinMillis = (endDateTime - System.currentTimeMillis());
+        // 增加过期时间
+         redisService.setValue(cacheKey, activityEntity,expireTimeinMillis);
          return activityEntity;
     }
 
@@ -251,7 +255,6 @@ public class ActivityRepository implements IActivityRepository {
 
     @Override
     public UserRaffleOrderEntity queryUnusedRaffleOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity) {
-
         // 查询数据
         UserRaffleOrder userRaffleOrderReq = new UserRaffleOrder();
         userRaffleOrderReq.setUserId(partakeRaffleActivityEntity.getUserId());
@@ -455,6 +458,16 @@ public class ActivityRepository implements IActivityRepository {
         redisService.setAtomicLong(cacheKey, stockCount);
     }
 
+    @Override
+    public Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId) {
+        RaffleActivityAccountDay raffleActivityAccountDayReq = new RaffleActivityAccountDay();
+        raffleActivityAccountDayReq.setActivityId(activityId);
+        raffleActivityAccountDayReq.setUserId(userId);
+        raffleActivityAccountDayReq.setDay(raffleActivityAccountDayReq.currentDay());
+        RaffleActivityAccountDay raffleActivityAccountDay = accountDayDao.queryActivityAccountDayByUserId(raffleActivityAccountDayReq);
+        return raffleActivityAccountDay == null? 0:raffleActivityAccountDay.getDayCount() - raffleActivityAccountDay.getDayCountSurplus();
+    }
+
     private static UserRaffleOrder getUserRaffleOrder(CreatePartakeOrderAggregate partakeOrderAggregate) {
         UserRaffleOrderEntity userRaffleOrderEntity = partakeOrderAggregate.getUserRaffleOrderEntity();
         return  UserRaffleOrder.builder()
@@ -466,8 +479,6 @@ public class ActivityRepository implements IActivityRepository {
                   .orderTime(userRaffleOrderEntity.getOrderTime())
                   .orderState(userRaffleOrderEntity.getOrderState().getCode())
                   .build();
-
-
     }
 
 }

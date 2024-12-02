@@ -77,6 +77,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
                 .orderId(RandomStringUtils.randomAlphanumeric(12))
                 .orderState(UserRaffleOrderStateVO.create)
                 .orderTime(currentDate)
+                .endDateTime(raffleActivityEntity.getEndDateTime())
                 .build();
 
         //5.填充抽奖单实体对象
@@ -99,6 +100,5 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
 
     protected abstract CreatePartakeOrderAggregate doFilterAccount(String userId, Long activityId, Date currentDate);
 
-//    protected abstract void doSavePartakeOrder(CreatePartakeOrderAggregate createPartakeOrderAggregate);
 
 }

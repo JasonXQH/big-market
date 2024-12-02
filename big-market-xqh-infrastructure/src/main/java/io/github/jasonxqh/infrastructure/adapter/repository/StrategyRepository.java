@@ -91,6 +91,7 @@ public class StrategyRepository implements IStrategyRepository {
                         .awardRate(strategyAward.getAwardRate())
                         .awardTitle(strategyAward.getAwardTitle())
                         .awardSubtitle(strategyAward.getAwardSubtitle())
+                        .ruleModels(strategyAward.getRuleModels())
                         .sort(strategyAward.getSort())
                         .build())
                 .collect(Collectors.toList());
@@ -247,8 +248,9 @@ public class StrategyRepository implements IStrategyRepository {
     }
 
     @Override
-    public Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity) {
+    public Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity, Date endDateTime) {
         String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY+strategyAwardEntity.getStrategyId() + "_" + strategyAwardEntity.getAwardId();
+
         long surplus = redisService.decr(cacheKey);
         if(surplus == 0){
             //发送mq消息,需要新建一个交换机
@@ -259,9 +261,21 @@ public class StrategyRepository implements IStrategyRepository {
             return false;
         }
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
-        Boolean lock = redisService.setNx(lockKey);
+        Boolean lock;
+        if(null != endDateTime){
+            long expireMillis = endDateTime.getTime() - System.currentTimeMillis()+TimeUnit.DAYS.toMillis(1);
+            lock = redisService.setNx(lockKey,expireMillis,TimeUnit.MILLISECONDS);
+        }else{
+            lock = redisService.setNx(lockKey);
+        }
+
         if(!lock) log.info("策略奖品库存加锁失败 {}",lockKey);
         return lock;
+    }
+
+    @Override
+    public Boolean subtractAwardStock(StrategyAwardEntity strategyAwardEntity) {
+        return subtractAwardStock(strategyAwardEntity, null);
     }
 
 
@@ -341,7 +355,6 @@ public class StrategyRepository implements IStrategyRepository {
     @Override
     public Long queryStrategyIdByActivityId(Long activityId) {
         return raffleActivityDao.queryStrategyIdByActivityId(activityId);
-
     }
 
     @Override
@@ -353,10 +366,21 @@ public class StrategyRepository implements IStrategyRepository {
         raffleActivityAccountDayReq.setUserId(userId);
         raffleActivityAccountDayReq.setActivityId(activityId);
         raffleActivityAccountDayReq.setDay(raffleActivityAccountDayReq.currentDay());
-        RaffleActivityAccountDay raffleActivityAccountDay = raffleActivityAccountDayDao.queryActivityAccountDayByUserId(raffleActivityAccountDayReq);
-        if (null == raffleActivityAccountDay) return 0;
+        Integer partakeCount = raffleActivityAccountDayDao.queryRaffleActivityAccountDayPartakeCount(raffleActivityAccountDayReq);
         // 总次数 - 剩余的，等于今日参与的
-        return raffleActivityAccountDay.getDayCount() - raffleActivityAccountDay.getDayCountSurplus();
+        return partakeCount == null ? 0 : partakeCount;
     }
+
+    @Override
+    public Map<String, Integer> queryAwardRuleLockCount(String[] treeIds) {
+        if(treeIds.length == 0 ) return Collections.emptyMap();
+        HashMap<String, Integer> map = new HashMap<>();
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleLocks(treeIds);
+        for(RuleTreeNode ruleTreeNode : ruleTreeNodes){
+            map.put(ruleTreeNode.getTreeId(), Integer.valueOf(ruleTreeNode.getRuleValue()));
+        }
+        return map;
+    }
+
 
 }

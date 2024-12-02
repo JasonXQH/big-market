@@ -2,6 +2,8 @@ package io.github.jasonxqh.domain.strategy.service.rule.tree.factory.engine;
 
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 
+import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -10,5 +12,5 @@ import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeF
  **/
 public interface IDecisionTreeEngine {
 
-    DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId);
+    DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId, Date endDateTime);
 }

@@ -2,13 +2,14 @@ package io.github.jasonxqh.domain.strategy.service.rule.tree.impl;
 
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
-import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.ILogicTreeNode;
 import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -24,12 +25,9 @@ public class RuleLockLogicTreeNode implements ILogicTreeNode {
     private IStrategyRepository strategyRepository;
 
     @Override
-    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId,String ruleValue) {
-
+    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDateTime) {
 
         log.info("规则树过滤-次数锁节点 userId:{} strategyId:{} awardId:{}", userId, strategyId,awardId);
-
-
         long raffleCount = 0L;
         try {
             raffleCount = Long.parseLong(ruleValue);

@@ -1,6 +1,7 @@
 package io.github.jasonxqh.domain.activity.adapter.repository;
 
 
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreatePartakeOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateSkuQuotaOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
@@ -48,4 +49,7 @@ public interface IActivityRepository {
     List<RaffleActivitySkuEntity> queryActivitySkuByActivityId(Long activityId);
 
     void cacheActivitySkuStockCount(String cacheKey, Integer stockCount);
+
+    @DBRouter
+    Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
 }

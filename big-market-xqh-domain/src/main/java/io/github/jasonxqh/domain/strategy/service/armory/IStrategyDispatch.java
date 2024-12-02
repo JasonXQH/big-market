@@ -1,5 +1,7 @@
 package io.github.jasonxqh.domain.strategy.service.armory;
 
+import java.util.Date;
+
 /**
  * @author : jasonxu
  * @mailto : xuqihang74@gmail.com
@@ -15,5 +17,5 @@ public interface IStrategyDispatch {
 
     Integer getRandomAwardId(Long strategyId, String weightValue);
 
-    Boolean subtractionAwardStock(Long strategyId,Integer awardId);
+    Boolean subtractionAwardStock(Long strategyId, Integer awardId, Date endDateTime);
 }

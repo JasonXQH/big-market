@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * @author : jasonxu
@@ -26,7 +27,7 @@ public class RuleLuckAwardLogicTreeNode implements ILogicTreeNode {
     private IStrategyRepository strategyRepository;
 
     @Override
-    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId,String ruleValue) {
+    public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDateTime) {
         String[] ruleParts = ruleValue.split(Constants.COLON);
         if (ruleParts.length == 0) {
             log.error("规则过滤-兜底奖品，兜底奖品未配置报警 userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);

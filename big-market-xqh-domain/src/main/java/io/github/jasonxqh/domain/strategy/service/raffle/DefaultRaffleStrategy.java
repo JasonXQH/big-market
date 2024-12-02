@@ -16,6 +16,7 @@ import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.engine.IDeci
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -42,6 +43,11 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
 
     @Override
     public DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId,Integer awardId) {
+       return raffleLogicTree(userId, strategyId, awardId,null);
+    }
+
+    @Override
+    public DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId, Integer awardId, Date endDateTime) {
         StrategyAwardRuleModelVO strategyAwardRuleModelVO = strategyRepository.queryStrategyAwardRuleModelVO(strategyId, awardId);
         if(strategyAwardRuleModelVO == null) {
             return DefaultTreeFactory.StrategyAwardVO.builder().awardId(awardId).build();
@@ -53,8 +59,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
             throw new RuntimeException("存在抽奖策略配置的规则模型，但是未在库表中配置对应的规则树信息");
         }
         IDecisionTreeEngine decisionTreeEngine = treeFactory.openLogicTree(ruleTreeVO);
-        DefaultTreeFactory.StrategyAwardVO strategyAwardVO = decisionTreeEngine.process(userId, strategyId, awardId);
-        return strategyAwardVO;
+        return decisionTreeEngine.process(userId, strategyId, awardId, endDateTime);
     }
 
 
@@ -82,6 +87,13 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
     public  List<StrategyAwardEntity> queryRaffleStrategyAwardList(Long strategyId){
         List<StrategyAwardEntity> strategyAwardEntities = strategyRepository.queryStrategyAwardList(strategyId);
         return strategyAwardEntities;
+    }
+
+    @Override
+    public List<StrategyAwardEntity> queryRaffleStrategyAwardListByActivityId(Long activityId) {
+        Long strategyId = strategyRepository.queryStrategyIdByActivityId(activityId);
+        log.info("在strategyId:{}", strategyId);
+        return queryRaffleStrategyAwardList(strategyId);
     }
 
 
