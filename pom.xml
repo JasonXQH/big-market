@@ -20,7 +20,7 @@
         <repository>
             <id>nexus-aliyun</id>
             <name>nexus-aliyun</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -139,7 +139,6 @@
                 <artifactId>spring-boot-starter-amqp</artifactId>
                 <version>3.2.0</version>
             </dependency>
-
             <!-- 工程模块 -->
             <dependency>
                 <groupId>io.github.jasonxqh</groupId>
