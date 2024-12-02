@@ -28,7 +28,7 @@ public class UpdateAwardStockJob {
     @Scheduled(cron = "0/5 * * * * ?")
     public void exec(){
         try {
-            log.info("定时任务，更新奖品消耗库存,降低对数据库的更新频次， 不要产生竞争");
+//            log.info("定时任务，更新奖品消耗库存,降低对数据库的更新频次， 不要产生竞争");
             List<StrategyAwardStockKeyVO> strategyAwardStockKeyVOS = raffleStock.takeQueueValues();
             for(StrategyAwardStockKeyVO strategyAwardStockKeyVO : strategyAwardStockKeyVOS){
                 raffleStock.updateStrategyAwardStock(

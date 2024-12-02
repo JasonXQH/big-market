@@ -27,13 +27,13 @@ public class UpdateSkuStockJob {
     @Scheduled(cron = "0/5 * * * * ?")
     public void exec(){
         try {
-            log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争");
+//            log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争");
             List<ActivitySkuStockKeyVO> activitySkuStockKeyVOS = skuStock.takeQueueValues();
             for(ActivitySkuStockKeyVO activitySkuStockKeyVO : activitySkuStockKeyVOS){
                 if(null == activitySkuStockKeyVO){
                     return;
                 }
-                log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争, sku:{} ,activityId:{}",activitySkuStockKeyVO.getSku(),activitySkuStockKeyVO.getActivityId());
+//                log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争, sku:{} ,activityId:{}",activitySkuStockKeyVO.getSku(),activitySkuStockKeyVO.getActivityId());
                 skuStock.updateStrategyAwardStock(activitySkuStockKeyVO.getSku(),activitySkuStockKeyVO.getActivityId());
             }
         }catch (Exception e){
