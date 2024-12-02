@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author : jasonxu
@@ -27,12 +28,14 @@ public class UpdateSkuStockJob {
     public void exec(){
         try {
             log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争");
-            ActivitySkuStockKeyVO activitySkuStockKeyVO = skuStock.takeQueueValue();
-            if(null == activitySkuStockKeyVO){
-                return;
+            List<ActivitySkuStockKeyVO> activitySkuStockKeyVOS = skuStock.takeQueueValues();
+            for(ActivitySkuStockKeyVO activitySkuStockKeyVO : activitySkuStockKeyVOS){
+                if(null == activitySkuStockKeyVO){
+                    return;
+                }
+                log.info("定时任务，更新 sku 消耗库存[延迟队列获取，降低对数据库的更新频次，不要产生竞争, sku:{} ,activityId:{}",activitySkuStockKeyVO.getSku(),activitySkuStockKeyVO.getActivityId());
+                skuStock.updateStrategyAwardStock(activitySkuStockKeyVO.getSku(),activitySkuStockKeyVO.getActivityId());
             }
-            log.info("定时任务，更新 sku消耗库存 sku:{} activityId:{} ", activitySkuStockKeyVO.getSku(), activitySkuStockKeyVO.getActivityId());
-            skuStock.updateStrategyAwardStock(activitySkuStockKeyVO.getSku());
         }catch (Exception e){
             log.error("定时任务，更新sku 消耗库存失败",e);
         }

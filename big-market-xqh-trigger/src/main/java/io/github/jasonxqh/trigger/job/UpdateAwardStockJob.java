@@ -36,8 +36,6 @@ public class UpdateAwardStockJob {
                             strategyAwardStockKeyVO.getAwardId()
                     );
             }
-
-
         }catch (Exception e){
             log.error("定时任务，更新奖品消耗库存失败",e);
         }

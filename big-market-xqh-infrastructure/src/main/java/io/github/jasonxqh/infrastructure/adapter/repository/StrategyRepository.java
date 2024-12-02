@@ -254,7 +254,12 @@ public class StrategyRepository implements IStrategyRepository {
         long surplus = redisService.decr(cacheKey);
         if(surplus == 0){
             //发送mq消息,需要新建一个交换机
-            eventPublisher.publish(awardStockZeroMessageEvent.getTopic(), awardStockZeroMessageEvent.buildEventMessage(strategyAwardEntity));
+            eventPublisher.publish(awardStockZeroMessageEvent.getTopic(), awardStockZeroMessageEvent.buildEventMessage(StrategyAwardStockKeyVO
+                    .builder()
+                    .awardId(strategyAwardEntity.getAwardId())
+                    .strategyId(strategyAwardEntity.getStrategyId())
+                    .build()
+            ));
             return true;
         }else if(surplus < 0){
             redisService.setAtomicLong(cacheKey, 0);
@@ -281,17 +286,16 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
-        RDelayedQueue<StrategyAwardStockKeyVO> awardDelayedQueue = queueManager.getOrCreateRDelayedQueue(strategyAwardStockKeyVO);
-        log.info("向奖品专用延迟队列传入VO: {}", JSON.toJSON(strategyAwardStockKeyVO));
+        RDelayedQueue<StrategyAwardStockKeyVO> awardDelayedQueue = queueManager.getOrCreateStrategyAwardStockKeyVORDelayedQueue(strategyAwardStockKeyVO);
+        log.info("向奖品专用延迟队列传入Award VO: {}", JSON.toJSON(strategyAwardStockKeyVO));
         awardDelayedQueue.offer(strategyAwardStockKeyVO,3, TimeUnit.SECONDS);
     }
 
     @Override
     public List<StrategyAwardStockKeyVO> takeQueueValue() {
         List<StrategyAwardStockKeyVO> awardVOs = new ArrayList<>();
-        Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> queueMap = queueManager.getAllRBlockingQueues();
+        Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> queueMap = queueManager.getAllStrategyAwardStockKeyVORBlockingQueues();
         for (Map.Entry<String, RBlockingQueue<StrategyAwardStockKeyVO>> entry : queueMap.entrySet()) {
-                String queueKey = entry.getKey();
                 RBlockingQueue<StrategyAwardStockKeyVO> queue = entry.getValue();
                 StrategyAwardStockKeyVO strategyAwardStockKeyVO = queue.poll();
                 if (strategyAwardStockKeyVO != null) {
@@ -337,10 +341,10 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public void clearStrategyAwardStock(StrategyAwardStockKeyVO  strategyAwardStockKeyVO) {
-        StrategyAward strategyAward = new StrategyAward();
-        strategyAward.setStrategyId(strategyAwardStockKeyVO.getStrategyId());
-        strategyAward.setAwardId(strategyAwardStockKeyVO.getAwardId());
-        strategyAwardDao.clearStrategyAwardStock(strategyAward);
+        StrategyAward strategyAwardReq = new StrategyAward();
+        strategyAwardReq.setStrategyId(strategyAwardStockKeyVO.getStrategyId());
+        strategyAwardReq.setAwardId(strategyAwardStockKeyVO.getAwardId());
+        strategyAwardDao.clearStrategyAwardStock(strategyAwardReq);
     }
 
     @Override

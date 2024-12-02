@@ -9,9 +9,9 @@ import java.util.List;
 public interface IRaffleActivitySkuDao {
     RaffleActivitySku queryActivitySku(Long sku);
 
-    void updateSkuStock(Long sku);
+    void updateSkuStock(RaffleActivitySku raffleActivitySkuReq);
 
-    void clearActivitySkuStock(Long sku);
+    void clearActivitySkuStock(RaffleActivitySku skuReq);
 
     List<RaffleActivitySku> queryActivitySkuByActivityId(Long activityId);
 }
