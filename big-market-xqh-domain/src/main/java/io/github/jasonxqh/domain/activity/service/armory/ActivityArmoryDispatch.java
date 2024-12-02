@@ -1,7 +1,6 @@
 package io.github.jasonxqh.domain.activity.service.armory;
 
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivitySkuEntity;
 import io.github.jasonxqh.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +17,9 @@ public class ActivityArmoryDispatch implements IActivityDispatch,IActivitySkuArm
     IActivityRepository activityRepository;
 
     @Override
-    public Boolean subtractionSkuStock(Long sku, Date endDateTime) {
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + sku;
-        return activityRepository.substractionSkuStock(sku,cacheKey,endDateTime);
+    public Boolean subtractionSkuStock(RaffleActivitySkuEntity raffleActivitySkuEntity, Date endDateTime) {
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_STOCK_COUNT_KEY + raffleActivitySkuEntity.getSku();
+        return activityRepository.substractionSkuStock(raffleActivitySkuEntity,cacheKey,endDateTime);
     }
 
     @Override

@@ -26,15 +26,15 @@ public interface IActivityRepository {
 
     void awardSkuStockConsumeSendQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO);
 
-    ActivitySkuStockKeyVO takeQueueValue();
+    List<ActivitySkuStockKeyVO> takeQueueValue();
 
-    void updateSkuStock(Long sku);
+    void updateSkuStock(Long sku, Long activityId);
 
-    Boolean substractionSkuStock(Long sku, String cacheKey, Date endDateTime);
+    Boolean substractionSkuStock(RaffleActivitySkuEntity raffleActivitySku, String cacheKey, Date endDateTime);
 
-    void clearQueueValue();
+    void clearQueueValue(ActivitySkuStockKeyVO skuStockKeyVO);
 
-    void clearActivitySkuStock(Long sku);
+    void clearActivitySkuStock(ActivitySkuStockKeyVO skuStockKeyVO);
 
     UserRaffleOrderEntity queryUnusedRaffleOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity);
 

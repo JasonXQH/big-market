@@ -28,12 +28,12 @@ public class ActivitySkuStockActionChain extends AbstractActionChain {
     public boolean action(RaffleActivitySkuEntity raffleActivitySkuEntity, RaffleActivityEntity raffleActivityEntity, RaffleActivityCountEntity raffleActivityCountEntity) {
         log.info("活动责任链-商品库存处理【校验&扣减】开始。sku:{},activityId:{}",raffleActivitySkuEntity.getSku(),raffleActivitySkuEntity.getActivityId());
         //sku库存扣减
-        Boolean status = activityDispatch.subtractionSkuStock(raffleActivitySkuEntity.getSku(),raffleActivityEntity.getEndDateTime());
+        Boolean status = activityDispatch.subtractionSkuStock(raffleActivitySkuEntity,raffleActivityEntity.getEndDateTime());
         if(status){
             log.info("规则过滤-sku库存扣减成功，向redis延迟队列发送消息 ");
             activityRepository.awardSkuStockConsumeSendQueue(ActivitySkuStockKeyVO.builder()
                     .sku(raffleActivitySkuEntity.getSku())
-                    .activityId(raffleActivityCountEntity.getActivityCountId())
+                    .activityId(raffleActivityEntity.getActivityId())
                     .build());
             return  true;
         }

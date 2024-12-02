@@ -1,5 +1,6 @@
 package io.github.jasonxqh.infrastructure.adapter.support;
 
+import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 import io.github.jasonxqh.infrastructure.redis.IRedisService;
 import io.github.jasonxqh.types.common.Constants;
@@ -14,33 +15,42 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class QueueManager {
 
-    private final Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> rBlockingQueueMap = new ConcurrentHashMap<>();
-    private final Map<String, RDelayedQueue<StrategyAwardStockKeyVO>> rDelayedQueueMap = new ConcurrentHashMap<>();
+    private final Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> rBlockingStrategyAwardStockKeyVOQueueMap = new ConcurrentHashMap<>();
+    private final Map<String, RDelayedQueue<StrategyAwardStockKeyVO>> rDelayedStrategyAwardStockKeyVOQueueMap = new ConcurrentHashMap<>();
+
+    private final Map<String, RBlockingQueue<ActivitySkuStockKeyVO>> rBlockingActivitySkuStockKeyVOQueueMap = new ConcurrentHashMap<>();
+    private final Map<String, RDelayedQueue<ActivitySkuStockKeyVO>> rDelayedActivitySkuStockKeyVOQueueMap = new ConcurrentHashMap<>();
+
+
 
     @Resource
     private IRedisService redisService;
 
-    public RBlockingQueue<StrategyAwardStockKeyVO> getOrCreateRBlockingQueue( StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
-        String queueKey = strategyAwardStockKeyVO.getStrategyId() + "_" + strategyAwardStockKeyVO.getAwardId();
-        return rBlockingQueueMap.computeIfAbsent(queueKey, key -> {
-            String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY + queueKey;
-            return redisService.getBlockingQueue(cacheKey);
-        });
-    }
-
-    public RDelayedQueue<StrategyAwardStockKeyVO> getOrCreateRDelayedQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
-        String queueKey = strategyAwardStockKeyVO.getStrategyId() + "_" + strategyAwardStockKeyVO.getAwardId();
-        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY + queueKey;
-        rBlockingQueueMap.computeIfAbsent(cacheKey, key -> {
-            return redisService.getBlockingQueue(cacheKey);
-        });
-        return rDelayedQueueMap.computeIfAbsent(cacheKey, key -> {
-            RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = rBlockingQueueMap.get(cacheKey);
+    public RDelayedQueue<ActivitySkuStockKeyVO> getOrCreateActivitySkuStockKeyVORDelayedQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO) {
+        String queueKey = activitySkuStockKeyVO.getActivityId() + "_" + activitySkuStockKeyVO.getSku();
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY + queueKey;
+        rBlockingActivitySkuStockKeyVOQueueMap.computeIfAbsent(cacheKey, key -> redisService.getBlockingQueue(cacheKey));
+        return rDelayedActivitySkuStockKeyVOQueueMap.computeIfAbsent(cacheKey, key -> {
+            RBlockingQueue<ActivitySkuStockKeyVO> blockingQueue = rBlockingActivitySkuStockKeyVOQueueMap.get(cacheKey);
             return redisService.getDelayedQueue(blockingQueue);
         });
     }
 
-    public Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> getAllRBlockingQueues() {
-        return rBlockingQueueMap;
+    public RDelayedQueue<StrategyAwardStockKeyVO> getOrCreateStrategyAwardStockKeyVORDelayedQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
+        String queueKey = strategyAwardStockKeyVO.getStrategyId() + "_" + strategyAwardStockKeyVO.getAwardId();
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_QUERY_KEY + queueKey;
+        rBlockingStrategyAwardStockKeyVOQueueMap.computeIfAbsent(cacheKey, key -> redisService.getBlockingQueue(cacheKey));
+        return rDelayedStrategyAwardStockKeyVOQueueMap.computeIfAbsent(cacheKey, key -> {
+            RBlockingQueue<StrategyAwardStockKeyVO> blockingQueue = rBlockingStrategyAwardStockKeyVOQueueMap.get(cacheKey);
+            return redisService.getDelayedQueue(blockingQueue);
+        });
+    }
+
+
+    public Map<String, RBlockingQueue<StrategyAwardStockKeyVO>> getAllStrategyAwardStockKeyVORBlockingQueues() {
+        return rBlockingStrategyAwardStockKeyVOQueueMap;
+    }
+    public Map<String, RBlockingQueue<ActivitySkuStockKeyVO>> getAllActivitySkuStockKeyVORBlockingQueues() {
+        return rBlockingActivitySkuStockKeyVOQueueMap;
     }
 }

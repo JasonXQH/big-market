@@ -10,6 +10,7 @@ import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
 import io.github.jasonxqh.domain.activity.model.valobj.UserRaffleOrderStateVO;
+import io.github.jasonxqh.infrastructure.adapter.support.QueueManager;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.activity.*;
 import io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder;
@@ -21,14 +22,16 @@ import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -73,6 +76,8 @@ public class ActivityRepository implements IActivityRepository {
 
     @Resource
     private ActivitySkuStockZeroMessageEvent activitySkuStockZeroMessageEvent;
+    @Autowired
+    private QueueManager queueManager;
 
 
     @Override
@@ -202,35 +207,50 @@ public class ActivityRepository implements IActivityRepository {
 
     @Override
     public void awardSkuStockConsumeSendQueue(ActivitySkuStockKeyVO activitySkuStockKeyVO) {
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
-        RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
-        RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
-        delayedQueue.offer(activitySkuStockKeyVO,3, TimeUnit.SECONDS);
+        RDelayedQueue<ActivitySkuStockKeyVO> activitySkuStockKeyVORDelayedQueue = queueManager.getOrCreateActivitySkuStockKeyVORDelayedQueue(activitySkuStockKeyVO);
+        log.info("向sku专用延迟队列传入Sku VO: {}", JSON.toJSONString(activitySkuStockKeyVO));
+        activitySkuStockKeyVORDelayedQueue.offer(activitySkuStockKeyVO,3, TimeUnit.SECONDS);
     }
 
     @Override
-    public ActivitySkuStockKeyVO takeQueueValue() {
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
-        RBlockingQueue<ActivitySkuStockKeyVO> targetQueue = redisService.getBlockingQueue(cacheKey);
-        return targetQueue.poll();
+    public List<ActivitySkuStockKeyVO> takeQueueValue() {
+        List<ActivitySkuStockKeyVO> skuStockKeyVOList = new ArrayList<>();
+        Map<String,RBlockingQueue<ActivitySkuStockKeyVO>> queueMap = queueManager.getAllActivitySkuStockKeyVORBlockingQueues();
+        for(Map.Entry<String,RBlockingQueue<ActivitySkuStockKeyVO>>entry:queueMap.entrySet()){
+            RBlockingQueue<ActivitySkuStockKeyVO> queue = entry.getValue();
+            ActivitySkuStockKeyVO activitySkuStockKeyVO =queue.poll();
+            if(null != activitySkuStockKeyVO){
+                skuStockKeyVOList.add(activitySkuStockKeyVO);
+            }
+        }
+        return skuStockKeyVOList;
     }
 
     @Override
-    public void updateSkuStock(Long sku) {
-        skuDao.updateSkuStock(sku);
+    public void updateSkuStock(Long sku, Long activityId) {
+        RaffleActivitySku skuReq = new RaffleActivitySku();
+        skuReq.setSku(sku);
+        skuReq.setActivityId(activityId);
+        skuDao.updateSkuStock(skuReq);
     }
 
     @Override
-    public Boolean substractionSkuStock(Long sku, String cacheKey, Date endDateTime) {
-            long surplus = redisService.decr(cacheKey);
+    public Boolean substractionSkuStock(RaffleActivitySkuEntity raffleActivitySku, String cacheKey, Date endDateTime) {
+        Long sku = raffleActivitySku.getSku();
+        Long activityId = raffleActivitySku.getActivityId();
+        long surplus = redisService.decr(cacheKey);
             if(surplus == 0){
-                eventPublisher.publish(activitySkuStockZeroMessageEvent.getTopic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
+                eventPublisher.publish(activitySkuStockZeroMessageEvent.getTopic(), activitySkuStockZeroMessageEvent.buildEventMessage(ActivitySkuStockKeyVO.builder()
+                        .activityId(activityId)
+                        .sku(sku)
+                        .build()
+                ));
                 return false;
             } else if (surplus < 0) {
                 redisService.setAtomicLong(cacheKey, 0);
                 return false;
             }
-        // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
+            // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
             // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了
             String lockKey = cacheKey + Constants.UNDERLINE + surplus;
             Long expireMillis = endDateTime.getTime() - System.currentTimeMillis()+TimeUnit.DAYS.toMillis(1);
@@ -240,8 +260,9 @@ public class ActivityRepository implements IActivityRepository {
     }
 
     @Override
-    public void clearQueueValue() {
-        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY;
+    public void clearQueueValue(ActivitySkuStockKeyVO activitySkuStockKeyVO) {
+        String queueKey = activitySkuStockKeyVO.getActivityId() + "_" + activitySkuStockKeyVO.getSku();
+        String cacheKey = Constants.RedisKey.ACTIVITY_SKU_COUNT_QUERY_KEY + queueKey;
         RBlockingQueue<Object> blockingQueue = redisService.getBlockingQueue(cacheKey);
         RDelayedQueue<Object> delayedQueue = redisService.getDelayedQueue(blockingQueue);
         blockingQueue.clear();
@@ -249,8 +270,11 @@ public class ActivityRepository implements IActivityRepository {
     }
 
     @Override
-    public void clearActivitySkuStock(Long sku){
-        skuDao.clearActivitySkuStock(sku);
+    public void clearActivitySkuStock(ActivitySkuStockKeyVO skuStockKeyVOReq){
+        RaffleActivitySku skuReq = new RaffleActivitySku();
+        skuReq.setSku(skuStockKeyVOReq.getSku());
+        skuReq.setActivityId(skuStockKeyVOReq.getActivityId());
+        skuDao.clearActivitySkuStock(skuReq);
     }
 
     @Override

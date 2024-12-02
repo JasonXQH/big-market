@@ -37,13 +37,6 @@ public class RuleLuckAwardLogicTreeNode implements ILogicTreeNode {
         Integer luckAwardId = Integer.valueOf(ruleParts[0]);
         String awardRuleValue = ruleParts.length > 1 ? ruleParts[1] : "";
 
-        //写入延迟队列，延迟消费更新数据库记录
-        log.info("走兜底奖品：随机积分，向队列发送消息 userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);
-        strategyRepository.awardStockConsumeSendQueue( StrategyAwardStockKeyVO.builder()
-                .strategyId(strategyId)
-                .awardId(luckAwardId)
-                .build());
-
         return DefaultTreeFactory.TreeActionEntity.builder()
                 .ruleLogicCheckTypeVO(RuleLogicCheckTypeVO.TAKE_OVER)
                 .strategyAwardVO(DefaultTreeFactory.StrategyAwardVO.builder()

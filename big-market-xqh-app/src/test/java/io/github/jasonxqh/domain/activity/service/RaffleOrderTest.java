@@ -3,6 +3,7 @@ package io.github.jasonxqh.domain.activity.service;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.SkuRechargeEntity;
+import io.github.jasonxqh.domain.activity.service.armory.IActivityDispatch;
 import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,18 +27,17 @@ import java.util.concurrent.CountDownLatch;
 @SpringBootTest
 public class RaffleOrderTest {
     @Resource
-                           private IActivityRepository activityRepository;
-
+    private IActivityRepository activityRepository;
+    @Resource
+    private IRaffleActivityAccountQuotaService rafleActivityAccountQuotaService;
     @Resource
     private IRaffleActivityAccountQuotaService accountQuotaService;
     @Resource
     private IActivitySkuArmory activityArmory;
-
-//    @Before
-//    public void setUp() {
-//        log.info("装配活动：{}", activityArmory.assembleActivitySku(9011L));
-//    }
-
+    @Before
+    public void setUp() {
+        log.info("装配活动：{}", activityArmory.assembleActivitySku(9011L));
+    }
     @Test
     public void test_createSkuRechargeOrder_duplicate() {
         SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
@@ -61,22 +61,22 @@ public class RaffleOrderTest {
      * 2. 清空 redis 缓存 flushall
      * 3. for 循环20次，消耗完库存，最终数据库剩余库存为0
      */
-//    @Test
-//    public void test_createSkuRechargeOrder() throws InterruptedException {
-//        for (int i = 0; i < 20; i++) {
-//            try {
-//                SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
-//                skuRechargeEntity.setUserId("xiaofuge");
-//                skuRechargeEntity.setSku(9011L);
-//                // outBusinessNo 作为幂等仿重使用，同一个业务单号2次使用会抛出索引冲突 Duplicate entry '700091009111' for key 'uq_out_business_no' 确保唯一性。
-//                skuRechargeEntity.setOutBusinessNo(RandomStringUtils.randomNumeric(12));
-//                String orderId = activityRepository.createOrder(skuRechargeEntity);
-//                log.info("测试结果：{}", orderId);
-//            } catch (AppException e) {
-//                log.warn(e.getInfo());
-//            }
-//        }
-//
-//        new CountDownLatch(1).await();
-//    }
+    @Test
+    public void test_createSkuRechargeOrder() throws InterruptedException {
+        for (int i = 0; i < 2000; i++) {
+            try {
+                SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
+                skuRechargeEntity.setUserId("xiaofuge");
+                skuRechargeEntity.setSku(9011L);
+                skuRechargeEntity.setOutBusinessNo(RandomStringUtils.randomAlphanumeric(10));
+                skuRechargeEntity.setOutBusinessNo(RandomStringUtils.randomNumeric(12));
+                String orderId = rafleActivityAccountQuotaService.createOrder(skuRechargeEntity);
+                log.info("测试结果：{}", orderId);
+            } catch (AppException e) {
+                log.warn(e.getInfo());
+            }
+        }
+
+        new CountDownLatch(1).await();
+    }
 }
