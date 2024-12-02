@@ -100,10 +100,4 @@ public class SnowFlake {
         return System.currentTimeMillis();
     }
 
-    public static void main(String[] args) {
-        SnowFlake worker = new SnowFlake(1, 1);
-        for (int i = 0; i < 10; i++) {
-            System.out.println(worker.nextId());  // 输出截取后的订单 ID
-        }
-    }
 }
