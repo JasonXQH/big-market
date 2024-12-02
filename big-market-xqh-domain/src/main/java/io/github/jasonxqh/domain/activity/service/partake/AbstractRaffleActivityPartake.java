@@ -9,13 +9,11 @@ import io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity;
 import io.github.jasonxqh.domain.activity.model.valobj.ActivityStateVO;
 import io.github.jasonxqh.domain.activity.model.valobj.UserRaffleOrderStateVO;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityPartakeService;
+import io.github.jasonxqh.types.common.SnowFlake;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
@@ -26,6 +24,7 @@ import java.util.Date;
 
 @Slf4j
 public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPartakeService {
+    SnowFlake worker = new SnowFlake(1, 1);
     protected final IActivityRepository activityRepository;
 
     protected AbstractRaffleActivityPartake(IActivityRepository activityRepository) {
@@ -74,7 +73,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
                 .userId(userId)
                 .strategyId(raffleActivityEntity.getStrategyId())
                 .activityName(raffleActivityEntity.getActivityName())
-                .orderId(RandomStringUtils.randomAlphanumeric(12))
+                .orderId(worker.nextId())
                 .orderState(UserRaffleOrderStateVO.create)
                 .orderTime(currentDate)
                 .endDateTime(raffleActivityEntity.getEndDateTime())
