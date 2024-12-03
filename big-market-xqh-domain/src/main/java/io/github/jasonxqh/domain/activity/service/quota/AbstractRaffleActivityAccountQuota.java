@@ -34,7 +34,7 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
 
         return null;
     }
-
+    //用户要签到、打卡、下单 等行为，才会创建一个订单，实现SKU库存扣减和增加抽奖次数
     @Override
     public String createOrder(SkuRechargeEntity skuRechargeEntity) {
 

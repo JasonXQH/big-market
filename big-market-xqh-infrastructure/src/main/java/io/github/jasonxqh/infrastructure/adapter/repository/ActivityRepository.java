@@ -177,7 +177,7 @@ public class ActivityRepository implements IActivityRepository {
         }finally {
             routerStrategy.clear();
         }
-
+        //TODO 发送TASK任务，增加用户次数。
     }
 
     private static RaffleActivityOrder getRaffleActivityOrder(RaffleActivityOrderEntity raffleActivityOrderEntity) {
