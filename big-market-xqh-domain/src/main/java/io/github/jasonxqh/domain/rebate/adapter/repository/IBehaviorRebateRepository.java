@@ -10,4 +10,6 @@ public interface  IBehaviorRebateRepository {
     List<DailyBehaviorRebateVO> queryDailyBehaviorRebateByBehaviorType(String code);
 
     void doSaveRebateOrderAggregate(String userId, List<BehaviorRebateOrderAggregate> behaviorRebateOrderAggregates);
+
+    Integer queryOrderByOutBusinessNo(String userId, String outBusinessNo);
 }

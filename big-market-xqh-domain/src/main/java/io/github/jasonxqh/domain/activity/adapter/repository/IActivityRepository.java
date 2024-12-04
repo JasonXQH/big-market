@@ -38,7 +38,9 @@ public interface IActivityRepository {
 
     UserRaffleOrderEntity queryUnusedRaffleOrder(PartakeRaffleActivityEntity partakeRaffleActivityEntity);
 
-    RaffleActivityAccountEntity queryActivityAccountByUserId(String userId, Long activityId);
+    RaffleActivityAccountEntity queryActivityAccountByUserIdAndActivityId(String userId, Long activityId);
+
+    RaffleActivityAccountEntity queryActivityAccountByUserIdAndActivityIdFromFront(String userId, Long activityId);
 
     RaffleActivityAccountMonthEntity queryActivityAccountMonthByUserId(String userId, Long activityId, String month);
 
@@ -52,4 +54,6 @@ public interface IActivityRepository {
 
     @DBRouter
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
+
+    Integer queryActivityAccountPartakeCount(String userId, Long activityId);
 }

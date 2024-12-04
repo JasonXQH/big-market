@@ -21,12 +21,12 @@
                 rule_type,
                 rule_model,
                 rule_value,
-                rule_desc,
+                rule_desc
         FROM strategy_rule
         LIMIT 10;
     </select>
 
-    <select id="queryStrategyRule" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule" resultMap="dataMap">
+    <select id="queryStrategyRuleByStrategyIdAndRuleModel" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule" resultMap="dataMap">
         SELECT
             strategy_id,
             award_id,
@@ -53,4 +53,14 @@
         </if>
     </select>
 
+    <select id="queryStrategyRuleByStrategyId" parameterType="io.github.jasonxqh.infrastructure.dao.po.strategy.StrategyRule"  resultType="java.lang.String">
+        SELECT
+            rule_value
+        FROM
+        strategy_rule
+        WHERE
+        strategy_id = #{strategyId}
+        AND
+        rule_model = #{ruleModel}
+    </select>
 </mapper>

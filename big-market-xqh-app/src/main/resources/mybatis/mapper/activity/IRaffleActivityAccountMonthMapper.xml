@@ -36,4 +36,12 @@
     from raffle_activity_account_month
     where activity_id = #{activityId} and user_id = #{userId} and month = #{month}
   </select>
+
+  <update id="updateActivityAccountMonthAddQuota">
+    update raffle_activity_account_month
+    set month_count_surplus = month_count_surplus + #{monthCountSurplus},
+    month_count = month_count + #{monthCount},
+    update_time = now()
+    where user_id = #{userId} and activity_id = #{activityId} and month = #{month}
+  </update>
 </mapper>

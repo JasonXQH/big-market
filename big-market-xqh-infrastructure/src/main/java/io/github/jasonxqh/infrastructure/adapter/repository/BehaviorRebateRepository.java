@@ -7,6 +7,7 @@ import io.github.jasonxqh.domain.rebate.model.aggregate.BehaviorRebateOrderAggre
 import io.github.jasonxqh.domain.rebate.model.entity.TaskEntity;
 import io.github.jasonxqh.domain.rebate.model.entity.UserBehaviorRebateOrderEntity;
 import io.github.jasonxqh.domain.rebate.model.vo.DailyBehaviorRebateVO;
+import io.github.jasonxqh.domain.rebate.model.vo.RebateTypeVO;
 import io.github.jasonxqh.infrastructure.dao.IDailyBehaviorRebateDao;
 import io.github.jasonxqh.infrastructure.dao.ITaskDao;
 import io.github.jasonxqh.infrastructure.dao.IUserBehaviorRebateOrderDao;
@@ -14,6 +15,7 @@ import io.github.jasonxqh.infrastructure.dao.po.Task;
 import io.github.jasonxqh.infrastructure.dao.po.rebate.DailyBehaviorRebate;
 import io.github.jasonxqh.infrastructure.dao.po.rebate.UserBehaviorRebateOrder;
 import io.github.jasonxqh.infrastructure.event.EventPublisher;
+import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +24,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
 public class BehaviorRebateRepository implements IBehaviorRebateRepository {
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     @Resource
     private IDailyBehaviorRebateDao dailyBehaviorRebateDao;
     @Resource
@@ -107,9 +111,16 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
         }
     }
 
+    @Override
+    public Integer queryOrderByOutBusinessNo(String userId, String outBusinessNo) {
+        UserBehaviorRebateOrder userBehaviorRebateOrderReq = new UserBehaviorRebateOrder();
+        userBehaviorRebateOrderReq.setUserId(userId);
+        userBehaviorRebateOrderReq.setOutBusinessNo(outBusinessNo);
+        return  userBehaviorRebateOrderDao.queryOrderNumberByBusinessNo(userBehaviorRebateOrderReq);
+    }
+
     private static UserBehaviorRebateOrder getUserBehaviorRebateOrder(String userId, BehaviorRebateOrderAggregate behaviorRebateOrderAggregate) {
         UserBehaviorRebateOrderEntity userBehaviorRebateOrderEntity = behaviorRebateOrderAggregate.getUserBehaviorRebateOrder();
-
         UserBehaviorRebateOrder userBehaviorRebateOrder = new UserBehaviorRebateOrder();
         userBehaviorRebateOrder.setUserId(userId);
         userBehaviorRebateOrder.setOrderId(userBehaviorRebateOrderEntity.getOrderId());
@@ -118,6 +129,7 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
         userBehaviorRebateOrder.setRebateDesc(userBehaviorRebateOrderEntity.getRebateDesc());
         userBehaviorRebateOrder.setRebateConfig(userBehaviorRebateOrderEntity.getRebateConfig());
         userBehaviorRebateOrder.setBizId(userBehaviorRebateOrderEntity.getBizId());
+        userBehaviorRebateOrder.setOutBusinessNo(userBehaviorRebateOrderEntity.getOutBusinessNo());
         return userBehaviorRebateOrder;
     }
 }

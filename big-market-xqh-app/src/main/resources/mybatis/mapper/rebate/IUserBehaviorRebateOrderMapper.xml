@@ -11,6 +11,7 @@
     <result column="rebate_type" jdbcType="VARCHAR" property="rebateType" />
     <result column="rebate_config" jdbcType="VARCHAR" property="rebateConfig" />
     <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="out_business_no" jdbcType="VARCHAR" property="outBusinessNo" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
@@ -25,11 +26,18 @@
           rebate_type,
           rebate_config,
           biz_id,
+          out_business_no,
           create_time,
           update_time
         )
         values
-        (#{userId}, #{orderId}, #{behaviorType}, #{rebateDesc}, #{rebateType}, #{rebateConfig},#{bizId}, now(), now())
-
+        (#{userId}, #{orderId}, #{behaviorType}, #{rebateDesc}, #{rebateType}, #{rebateConfig},#{bizId}, #{outBusinessNo},now(), now())
     </insert>
+
+  <select id="queryOrderNumberByBusinessNo" parameterType="io.github.jasonxqh.infrastructure.dao.po.rebate.UserBehaviorRebateOrder" resultType="java.lang.Integer">
+      SELECT COUNT(*)
+      FROM user_behavior_rebate_order
+      WHERE user_id = #{userId}
+      AND out_business_no = #{outBusinessNo}
+  </select>
 </mapper>

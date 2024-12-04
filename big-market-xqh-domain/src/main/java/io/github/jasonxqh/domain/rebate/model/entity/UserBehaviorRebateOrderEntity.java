@@ -48,5 +48,8 @@ public class UserBehaviorRebateOrderEntity {
      */
     private String bizId;
 
+    /** 业务仿重ID - 外部透传，方便查询使用 */
+    private String outBusinessNo;
+
 
 }

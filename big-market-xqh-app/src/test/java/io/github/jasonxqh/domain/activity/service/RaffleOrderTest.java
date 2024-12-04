@@ -3,7 +3,6 @@ package io.github.jasonxqh.domain.activity.service;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.SkuRechargeEntity;
-import io.github.jasonxqh.domain.activity.service.armory.IActivityDispatch;
 import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +51,7 @@ public class RaffleOrderTest {
     @Test
     public void test_queryActivityAccount() {
 
-        RaffleActivityAccountEntity raffleActivityAccountEntity = activityRepository.queryActivityAccountByUserId("xiaofuge", 100301L);
+        RaffleActivityAccountEntity raffleActivityAccountEntity = activityRepository.queryActivityAccountByUserIdAndActivityId("xiaofuge", 100301L);
         System.out.println(raffleActivityAccountEntity.toString());
     }
     /**

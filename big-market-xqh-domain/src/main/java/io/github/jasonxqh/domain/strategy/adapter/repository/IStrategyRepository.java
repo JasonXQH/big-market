@@ -4,6 +4,7 @@ import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyRuleEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
+import io.github.jasonxqh.domain.strategy.model.vo.RuleWeightVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardRuleModelVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 
@@ -66,4 +67,9 @@ public interface IStrategyRepository {
 
 
     Map<String, Integer> queryAwardRuleLockCount(String[] treeIds);
+
+
+    List<RuleWeightVO> queryAwardRuleWeight(Long strategyId);
+
+    Integer queryActivityAccountTotalUseCount(String userId, Long strategyId);
 }

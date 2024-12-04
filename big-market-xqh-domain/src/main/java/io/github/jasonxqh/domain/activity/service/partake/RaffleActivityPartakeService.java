@@ -5,12 +5,9 @@ import io.github.jasonxqh.domain.activity.model.aggregate.CreatePartakeOrderAggr
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountDayEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountMonthEntity;
-import io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity;
-import io.github.jasonxqh.domain.activity.model.valobj.UserRaffleOrderStateVO;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -31,7 +28,7 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
     @Override
     protected CreatePartakeOrderAggregate doFilterAccount(String userId, Long activityId, Date currentDate) {
         //1. 查询账户总额度
-        RaffleActivityAccountEntity raffleActivityAccountEntity = activityRepository.queryActivityAccountByUserId(userId,activityId);
+        RaffleActivityAccountEntity raffleActivityAccountEntity = activityRepository.queryActivityAccountByUserIdAndActivityId(userId,activityId);
         //2. 判断总额度是否足够
         if(raffleActivityAccountEntity == null||raffleActivityAccountEntity.getTotalCountSurplus() <= 0){
             throw new AppException(ResponseCode.ACCOUNT_QUOTA_ERROR.getCode(),ResponseCode.ACCOUNT_QUOTA_ERROR.getInfo());

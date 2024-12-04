@@ -1,6 +1,9 @@
 package io.github.jasonxqh.infrastructure.dao.po.strategy;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -10,6 +13,9 @@ import java.util.Date;
  * @created : 2024/11/7, 星期四
  **/
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StrategyRule {
     /*自增ID*/
     private Long id;

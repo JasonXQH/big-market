@@ -6,23 +6,34 @@ import io.github.jasonxqh.api.IRaffleStrategyService;
 import io.github.jasonxqh.api.dto.*;
 import io.github.jasonxqh.api.response.Response;
 import io.github.jasonxqh.domain.activity.model.entity.PartakeRaffleActivityEntity;
+import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity;
+import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityPartakeService;
 import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
+import io.github.jasonxqh.domain.activity.service.quota.RaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
 import io.github.jasonxqh.domain.award.model.vo.AwardStateVO;
 import io.github.jasonxqh.domain.award.service.AwardService;
+import io.github.jasonxqh.domain.rebate.model.entity.BehaviorEntity;
+import io.github.jasonxqh.domain.rebate.model.entity.UserBehaviorRebateOrderEntity;
+import io.github.jasonxqh.domain.rebate.model.vo.BehaviorTypeVO;
+import io.github.jasonxqh.domain.rebate.service.IBehaviorRebateService;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.service.IRaffleAward;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyArmory;
+import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,18 +49,23 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 @RequestMapping("/api/v1/raffle/activity")
 public class RaffleActivityController implements IRaffleActivityService {
+    private final SimpleDateFormat dateFormatDay = new SimpleDateFormat("yyyy-MM-dd");
     private final IActivitySkuArmory activitySkuArmory;
     private final  IStrategyArmory strategyArmory;
     private final IRaffleStrategy strategyService;
     private final IRaffleActivityPartakeService activityPartakeService;
     private final AwardService awardService;
+    private final IBehaviorRebateService rebateService;
+    private final IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
 
-    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService,  IRaffleActivityPartakeService activityPartakeService, AwardService awardService) {
+    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService, IRaffleActivityPartakeService activityPartakeService, AwardService awardService, IBehaviorRebateService rebateService, IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService) {
         this.activitySkuArmory = activitySkuArmory;
         this.strategyArmory = strategyArmory;
         this.strategyService = strategyService;
         this.activityPartakeService = activityPartakeService;
         this.awardService = awardService;
+        this.rebateService = rebateService;
+        this.raffleActivityAccountQuotaService = raffleActivityAccountQuotaService;
     }
 
 
@@ -78,6 +94,8 @@ public class RaffleActivityController implements IRaffleActivityService {
             return response;
         }
     }
+
+
 
     @RequestMapping(value = "draw", method = RequestMethod.POST)
     @Override
@@ -140,4 +158,140 @@ public class RaffleActivityController implements IRaffleActivityService {
 
 
     }
+
+    /**
+     * 日历签到返利接口
+     *
+     * @param userId 用户ID
+     * @return 签到返利结果
+     * <p>
+     * 接口：<a href="http://localhost:8091/api/v1/raffle/activity/calendar_sign_rebate">/api/v1/raffle/activity/calendar_sign_rebate</a>
+     * 入参：xiaofuge
+     * <p>
+     * curl -X POST http://localhost:8091/api/v1/raffle/activity/calendar_sign_rebate -d "userId=xiaofuge" -H "Content-Type: application/x-www-form-urlencoded"
+     */
+    @RequestMapping(value = "calender_sign_rebate", method = RequestMethod.POST)
+    @Override
+    public Response<Boolean> calendarSignRebate(@RequestParam String userId) {
+        try{
+            log.info("日历签到返利开始 userId:{}", userId);
+            List<String> orderIds = rebateService.createOrder(BehaviorEntity.builder()
+                    .userId(userId)
+                    .outBusinessNo(dateFormatDay.format(new Date()))
+                    .behaviorType(BehaviorTypeVO.SIGN)
+                    .build());
+            log.info("日历签到返利完成 userId:{} orderIds: {}", userId, JSON.toJSONString(orderIds));
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(true)
+                    .build();
+        }catch (AppException e) {
+            log.error("用户签到失败 userId:{} activityId:{}",userId, e);
+            return Response.<Boolean>builder()
+                    .code(e.getCode())
+                    .info(e.getInfo())
+                    .build();
+        } catch (Exception e) {
+            log.error("用户签到失败 未知错误 userId:{} ",userId, e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+
+    }
+
+
+    /**
+     * 判断是否签到接口
+     * <p>
+     * curl -X POST http://localhost:8091/api/v1/raffle/activity/is_calendar_sign_rebate -d "userId=xiaofuge" -H "Content-Type: application/x-www-form-urlencoded"
+     */
+    @RequestMapping(value = "is_calendar_sign_rebate", method = RequestMethod.POST)
+    @Override
+    public Response<Boolean> isCalendarSignRebate(String userId) {
+        try{
+            log.info("查询用户是否已经签到开始 userId:{}", userId);
+            String outBusinessNo = dateFormatDay.format(new Date());
+            Integer behaviorRebateOrderSize = rebateService.queryOrderByOutBusinessNo(userId, outBusinessNo);
+            log.info("查询用户是否完成日历签到返利完成 userId:{} orders.size:{}", userId, behaviorRebateOrderSize);
+            return Response.<Boolean>builder()
+                    .data(behaviorRebateOrderSize != 0)
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getCode())
+                    .build();
+        }
+        catch (AppException e) {
+            log.error("查询用户是否已签到失败 userId:{} activityId:{}",userId, e);
+            return Response.<Boolean>builder()
+                    .code(e.getCode())
+                    .info(e.getInfo())
+                    .build();
+        } catch (Exception e) {
+            log.error("查询用户是否已签到失败 未知错误 userId:{} activityId:{}",userId, e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+    /**
+     * 查询账户额度
+     * <p>
+     * curl --request POST \
+     * --url http://localhost:8091/api/v1/raffle/activity/query_user_activity_account \
+     * --header 'content-type: application/json' \
+     * --data '{
+     * "userId":"xiaofuge",
+     * "activityId": 100301
+     * }'
+     */
+
+
+    @RequestMapping(value = "query_user_activity_account", method = RequestMethod.POST)
+    @Override
+    public Response<UserActivityAccountResponseDTO> queryUserActivityAccount(@RequestBody UserActivityAccountRequestDTO request) {
+        String userId = request.getUserId();
+        Long activityId = request.getActivityId();
+        try{
+            log.error("查询用户活动账户开始 userId:{} activityId:{}",userId,activityId);
+            // 1. 参数校验
+            if (StringUtils.isBlank(userId) || null == activityId) {
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+            }
+            RaffleActivityAccountEntity activityAccountEntity = raffleActivityAccountQuotaService.queryActivityAccountEntity(userId,activityId);
+            UserActivityAccountResponseDTO responseDTO = getUserActivityAccountResponseDTO(activityAccountEntity);
+            log.error("查询用户活动账户完成 userId:{} activityId:{} dto:{}",userId,activityId,JSON.toJSONString(responseDTO));
+            return  Response.<UserActivityAccountResponseDTO>builder()
+                    .data(responseDTO)
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getCode())
+                    .build();
+        }catch (AppException e) {
+            log.error("查询用户账户次数余额失败 userId:{} activityId:{}",userId,activityId, e);
+            return Response.<UserActivityAccountResponseDTO>builder()
+                    .code(e.getCode())
+                    .info(e.getInfo())
+                    .build();
+        } catch (Exception e) {
+            log.error("查询用户账户次数余额失败 未知错误 userId:{} activityId:{}",userId,activityId, e);
+            return Response.<UserActivityAccountResponseDTO>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    private static UserActivityAccountResponseDTO getUserActivityAccountResponseDTO(RaffleActivityAccountEntity activityAccountEntity) {
+        UserActivityAccountResponseDTO responseDTO = new UserActivityAccountResponseDTO();
+        responseDTO.setTotalCount(activityAccountEntity.getTotalCount());
+        responseDTO.setTotalCountSurplus(activityAccountEntity.getTotalCountSurplus());
+        responseDTO.setMonthCount(activityAccountEntity.getMonthCount());
+        responseDTO.setMonthCountSurplus(activityAccountEntity.getMonthCountSurplus());
+        responseDTO.setDayCount(activityAccountEntity.getDayCount());
+        responseDTO.setDayCountSurplus(activityAccountEntity.getDayCountSurplus());
+        return responseDTO;
+    }
+
 }

@@ -13,4 +13,6 @@ public interface IBehaviorRebateService {
      * @return 订单ID
      */
     List<String> createOrder(BehaviorEntity behaviorEntity);
+
+    Integer queryOrderByOutBusinessNo(String userId, String outBusinessNo);
 }

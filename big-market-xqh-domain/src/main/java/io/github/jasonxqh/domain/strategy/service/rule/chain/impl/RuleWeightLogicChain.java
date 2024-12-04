@@ -29,7 +29,6 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
     @Resource
     protected IStrategyDispatch strategyDispatch;
 
-    private Long userScore = 0L;
 
     @Override
     public DefaultChainFactory.StrategyAwardVO logic(String userId, Long strategyId) {
@@ -54,6 +53,7 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
                 })
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
 
+        Integer userScore = strategyRepository.queryActivityAccountTotalUseCount(userId, strategyId);
         // 使用stream找出最大的不超过score的权重值
         Long nextValue = analyticalValueGroup.keySet().stream()
                 .filter(weight -> weight <= userScore) // 过滤出小于等于score的权重

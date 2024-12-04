@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.activity.service;
 
+import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityOrderEntity;
 import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityShopCartEntity;
 import io.github.jasonxqh.domain.activity.model.entity.SkuRechargeEntity;
@@ -32,4 +33,8 @@ public interface IRaffleActivityAccountQuotaService {
      * @return 参与次数
      */
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
+
+    RaffleActivityAccountEntity queryActivityAccountEntity(String userId,Long activityId);
+
+    Integer queryActivityAccountPartakeCount(String userId, Long activityId);
 }

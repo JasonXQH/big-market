@@ -1,11 +1,6 @@
 package io.github.jasonxqh.trigger.listener;
 
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
-import io.github.jasonxqh.domain.award.event.SendAwardMessageEvent;
-import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
-import io.github.jasonxqh.types.event.BaseEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
