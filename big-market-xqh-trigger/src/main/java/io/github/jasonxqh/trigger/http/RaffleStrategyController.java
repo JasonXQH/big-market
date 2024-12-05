@@ -213,7 +213,7 @@ public class RaffleStrategyController implements IRaffleStrategyService {
                 //封装对象
                 RaffleStrategyRuleWeightResponseDTO raffleStrategyRuleWeightResponseDTO = new RaffleStrategyRuleWeightResponseDTO();
                 raffleStrategyRuleWeightResponseDTO.setStrategyAwards(strategyAwards);
-                raffleStrategyRuleWeightResponseDTO.setRuleWeightCount(userActivityAccountTotalUseCount);
+                raffleStrategyRuleWeightResponseDTO.setUserActivityAccountTotalUseCount(userActivityAccountTotalUseCount);
                 raffleStrategyRuleWeightResponseDTO.setRuleWeightCount(ruleWeightVO.getWeight());
                 raffleStrategyRuleWeightList.add(raffleStrategyRuleWeightResponseDTO);
             }

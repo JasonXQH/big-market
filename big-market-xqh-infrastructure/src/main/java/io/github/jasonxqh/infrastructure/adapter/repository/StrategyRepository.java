@@ -373,7 +373,7 @@ public class StrategyRepository implements IStrategyRepository {
         RaffleActivityAccountDay raffleActivityAccountDayReq = new RaffleActivityAccountDay();
         raffleActivityAccountDayReq.setUserId(userId);
         raffleActivityAccountDayReq.setActivityId(activityId);
-        raffleActivityAccountDayReq.setDay(raffleActivityAccountDayReq.currentDay());
+        raffleActivityAccountDayReq.setDay(RaffleActivityAccountDay.currentDay());
         Integer partakeCount = raffleActivityAccountDayDao.queryRaffleActivityAccountDayPartakeCount(raffleActivityAccountDayReq);
         // 总次数 - 剩余的，等于今日参与的
         return partakeCount == null ? 0 : partakeCount;

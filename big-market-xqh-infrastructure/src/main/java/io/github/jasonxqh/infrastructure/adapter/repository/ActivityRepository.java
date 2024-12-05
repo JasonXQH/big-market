@@ -158,7 +158,7 @@ public class ActivityRepository implements IActivityRepository {
             RaffleActivityAccountMonth raffleActivityAccountMonth = new RaffleActivityAccountMonth();
             raffleActivityAccountMonth.setUserId(raffleActivityAccountEntity.getUserId());
             raffleActivityAccountMonth.setActivityId(raffleActivityAccountEntity.getActivityId());
-            raffleActivityAccountMonth.setMonth(raffleActivityAccountMonth.currentMonth());
+            raffleActivityAccountMonth.setMonth(RaffleActivityAccountMonth.currentMonth());
             raffleActivityAccountMonth.setMonthCount(raffleActivityAccountEntity.getMonthCount());
             raffleActivityAccountMonth.setMonthCountSurplus(raffleActivityAccountEntity.getMonthCount());
 
@@ -166,7 +166,7 @@ public class ActivityRepository implements IActivityRepository {
             RaffleActivityAccountDay raffleActivityAccountDay = new RaffleActivityAccountDay();
             raffleActivityAccountDay.setUserId(raffleActivityAccountEntity.getUserId());
             raffleActivityAccountDay.setActivityId(raffleActivityAccountEntity.getActivityId());
-            raffleActivityAccountDay.setDay(raffleActivityAccountDay.currentDay());
+            raffleActivityAccountDay.setDay(RaffleActivityAccountDay.currentDay());
             raffleActivityAccountDay.setDayCount(raffleActivityAccountEntity.getDayCount());
             raffleActivityAccountDay.setDayCountSurplus(raffleActivityAccountEntity.getDayCount());
 //            log.info("account json: {}" , JSON.toJSON(raffleActivityAccount));
@@ -563,7 +563,7 @@ public class ActivityRepository implements IActivityRepository {
         RaffleActivityAccountDay raffleActivityAccountDayReq = new RaffleActivityAccountDay();
         raffleActivityAccountDayReq.setActivityId(activityId);
         raffleActivityAccountDayReq.setUserId(userId);
-        raffleActivityAccountDayReq.setDay(raffleActivityAccountDayReq.currentDay());
+        raffleActivityAccountDayReq.setDay(RaffleActivityAccountDay.currentDay());
         RaffleActivityAccountDay raffleActivityAccountDay = accountDayDao.queryActivityAccountDayByUserId(raffleActivityAccountDayReq);
         return raffleActivityAccountDay == null? 0:raffleActivityAccountDay.getDayCount() - raffleActivityAccountDay.getDayCountSurplus();
     }
