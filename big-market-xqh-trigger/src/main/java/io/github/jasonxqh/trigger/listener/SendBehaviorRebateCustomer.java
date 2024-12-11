@@ -39,18 +39,16 @@ public class SendBehaviorRebateCustomer {
             //如9011，就是sku的编号9011
             String rebateConfig = behaviorRebateMessage.getRebateConfig();
             String bizId = behaviorRebateMessage.getBiz_id();
-            if (RebateTypeVO.SKU.getCode().equals(behaviorRebateMessage.getRebateType())) {
-                SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
-                skuRechargeEntity.setSku(Long.valueOf(rebateConfig));
-                skuRechargeEntity.setUserId(userId);
-                skuRechargeEntity.setOutBusinessNo(bizId);
-                String order = accountQuotaService.createOrder(skuRechargeEntity);
-                log.info("监听用户行为返利记录消息，增加用户配额 topic: {} userId: {} bizId{} order:{}", topic, userId, bizId,order);
-            }else if(RebateTypeVO.INTEGRAL.getCode().equals(behaviorRebateMessage.getRebateType())) {
-                //用户积分奖励
-
+            if (! RebateTypeVO.SKU.getCode().equals(behaviorRebateMessage.getRebateType())) {
+                log.info("监听用户行为返利消息 - 非sku奖励暂时不处理 topic: {} message: {}", topic, message);
+                return;
             }
-
+            SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
+            skuRechargeEntity.setSku(Long.valueOf(rebateConfig));
+            skuRechargeEntity.setUserId(userId);
+            skuRechargeEntity.setOutBusinessNo(bizId);
+            String order = accountQuotaService.createOrder(skuRechargeEntity);
+            log.info("监听用户行为返利记录消息，增加用户配额 topic: {} userId: {} bizId{} order:{}", topic, userId, bizId,order);
         } catch (AppException e) {
             if (ResponseCode.INDEX_DUP.getCode().equals(e.getCode())) {
                 log.warn("监听用户行为返利消息，消费重复 topic: {} message: {}", topic, message, e);
