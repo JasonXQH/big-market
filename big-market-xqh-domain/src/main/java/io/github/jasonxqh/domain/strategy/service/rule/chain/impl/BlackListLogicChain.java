@@ -41,6 +41,7 @@ public class BlackListLogicChain extends AbstractLogicChain {
             return DefaultChainFactory.StrategyAwardVO.builder()
                     .awardId(awardId)
                     .logicModel(ruleModel())
+                    .awardRuleValue("0.01,1")
                     .build();
         }
         log.info("抽奖责任链-黑名单放行 userId:{} strategyId:{} ruleModel:{} ", userId, strategyId,ruleModel());

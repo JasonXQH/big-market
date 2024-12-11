@@ -8,4 +8,6 @@ import org.apache.ibatis.annotations.Mapper;
 @DBRouterStrategy(splitTable = true)
 public interface IUserAwardRecordDao {
     void saveUserAwardRecord(UserAwardRecord record);
+
+    int updateUserAwardRecord(UserAwardRecord userAwardRecordReq);
 }

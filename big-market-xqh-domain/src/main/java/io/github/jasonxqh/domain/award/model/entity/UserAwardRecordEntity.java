@@ -55,4 +55,5 @@ public class UserAwardRecordEntity {
      */
     private AwardStateVO awardState;
 
+    private String awardConfig;
 }

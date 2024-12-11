@@ -33,4 +33,10 @@
     (#{userId}, #{activityId}, #{strategyId}, #{orderId}, #{awardId}, #{awardTitle},#{awardTime},#{awardState}, now(), now())
 
   </insert>
+
+  <update id="updateUserAwardRecord" parameterType="io.github.jasonxqh.infrastructure.dao.po.award.UserAwardRecord">
+    update user_award_record
+    set order_state = 'complete' , update_time = now()
+    where user_id = #{userId} and order_id = #{orderId} and order_state = 'create'
+  </update>
 </mapper>

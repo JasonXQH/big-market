@@ -3,16 +3,19 @@ package io.github.jasonxqh.infrastructure.adapter.repository;
 import cn.bugstack.middleware.db.router.strategy.IDBRouterStrategy;
 import com.alibaba.fastjson.JSON;
 import io.github.jasonxqh.domain.award.adapter.repository.IAwardRepository;
+import io.github.jasonxqh.domain.award.model.aggregate.GiveOutPrizesAggregate;
 import io.github.jasonxqh.domain.award.model.aggregate.UserAwardRecordAggregate;
 import io.github.jasonxqh.domain.award.model.entity.TaskEntity;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
-import io.github.jasonxqh.infrastructure.dao.ITaskDao;
-import io.github.jasonxqh.infrastructure.dao.IUserAwardRecordDao;
-import io.github.jasonxqh.infrastructure.dao.IUserRaffleOrderDao;
+import io.github.jasonxqh.domain.award.model.entity.UserCreditRandomAwardEntity;
+import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.Task;
 import io.github.jasonxqh.infrastructure.dao.po.award.UserAwardRecord;
+import io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount;
 import io.github.jasonxqh.infrastructure.dao.po.strategy.UserRaffleOrder;
 import io.github.jasonxqh.infrastructure.event.EventPublisher;
+import io.github.jasonxqh.infrastructure.redis.IRedisService;
+import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +30,13 @@ import javax.annotation.Resource;
 @Repository
 public class AwardRepository implements IAwardRepository {
     @Resource
+    private IRedisService redisService;
+    @Resource
     private IUserAwardRecordDao userAwardRecordDao;
     @Resource
     private ITaskDao taskDao;
-
+    @Resource
+    private IAwardDao awardDao;
     @Resource
     private IUserRaffleOrderDao userRaffleOrderDao;
     @Resource
@@ -39,7 +45,8 @@ public class AwardRepository implements IAwardRepository {
     private TransactionTemplate transactionTemplate;
     @Resource
     private EventPublisher eventPublisher;
-
+    @Resource
+    private IUserCreditAccountDao userCreditAccountDao;
     @Override
     public void saveUserAwardRecord(UserAwardRecordAggregate userAwardRecordAggregate) {
         UserAwardRecordEntity userAwardRecordEntity = userAwardRecordAggregate.getUserAwardRecordEntity();
@@ -109,6 +116,81 @@ public class AwardRepository implements IAwardRepository {
         } catch (Exception e) {
             log.error("写入中奖记录，发送MQ消息失败 userId: {} topic: {}", userId, task.getTopic());
             taskDao.updateTaskSendMessageFail( task);
+        }
+
+    }
+
+    @Override
+    public String queryAwardConfigByAwardId(Integer awardId) {
+        String redisKey = Constants.RedisKey.AWARD_CONFIG_KEY+awardId;
+        String awardConfig = redisService.getValue(redisKey);
+        if(awardConfig != null) {
+            return awardConfig;
+        }
+        awardConfig = awardDao.queryAwardConfigByAwardId(awardId);
+        redisService.setValue(redisKey, awardConfig);
+        return awardConfig;
+    }
+
+    @Override
+    public String queryAwardKeyByAwardId(Integer awardId) {
+        String redisKey = Constants.RedisKey.AWARD_KEY+awardId;
+        String awardKey = redisService.getValue(redisKey);
+        if(awardKey != null) {
+            return awardKey;
+        }
+        awardKey = awardDao.queryAwardKeyByAwardId(awardId);
+        redisService.setValue(redisKey, awardKey);
+        return awardKey;
+    }
+
+    @Override
+    public void saveGiveOutPrizesAggregate(GiveOutPrizesAggregate giveOutPrizesAggregate) {
+        String userId = giveOutPrizesAggregate.getUserId();
+        //随机积分奖励实体
+        UserCreditRandomAwardEntity userCreditRandomAwardEntity = giveOutPrizesAggregate.getUserCreditRandomAwardEntity();
+        //用户中奖记录单
+        UserAwardRecordEntity userAwardRecordEntity = giveOutPrizesAggregate.getUserAwardRecordEntity();
+        //更新发奖记录
+        UserAwardRecord userAwardRecordReq = UserAwardRecord.builder()
+                .userId(userId)
+                .orderId(userAwardRecordEntity.getOrderId())
+                .awardId(userAwardRecordEntity.getAwardId())
+                .awardState(userAwardRecordEntity.getAwardState().getCode())
+                .build();
+
+        UserCreditAccount userCreditAccountReq = UserCreditAccount.builder()
+                .userId(userId)
+                .totalAmount(userCreditRandomAwardEntity.getCreditAmount())
+                .availableAmount(userCreditRandomAwardEntity.getCreditAmount())
+                .build();
+
+        try{
+            routerStrategy.doRouter(userId);
+            //编程式事务
+            transactionTemplate.execute(status -> {
+                try{
+                    //写入任务,存在就更新，不存在就插入
+                    int updateAccountCount = userCreditAccountDao.updateAddAmount(userCreditAccountReq);
+                    if (0 == updateAccountCount) {
+                        userCreditAccountDao.insert(userCreditAccountReq);
+                    }
+                    //更新中奖单中的发奖状态
+                    int count = userAwardRecordDao.updateUserAwardRecord(userAwardRecordReq);
+                    if( 1 != count ) {
+                        //回滚操作
+                        log.warn("更新中奖单记录，重复更新拦截 userId:{} giveOutPrizesAggregate:{}", userId, JSON.toJSONString(giveOutPrizesAggregate));
+                        status.setRollbackOnly();
+                    }
+                    return 1;
+                }catch (DuplicateKeyException e){
+                    status.setRollbackOnly();
+                    log.error("更新中奖记录，唯一索引冲突 userId: {} ", userId, e);
+                    throw new AppException(ResponseCode.INDEX_DUP.getCode(),ResponseCode.INDEX_DUP.getInfo());
+                }
+            });
+        }finally {
+            routerStrategy.clear();
         }
 
     }
