@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.jasonxqh.infrastructure.dao.IUserCreditAccountDao">
+  <resultMap id="BaseResultMap" type="io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount">
+    <id     column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="total_amount" jdbcType="DECIMAL" property="totalAmount" />
+    <result column="available_amount" jdbcType="DECIMAL" property="availableAmount" />
+    <result column="account_status" jdbcType="VARCHAR" property="accountStatus" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <insert id="insert" parameterType="io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount">
+    insert into user_credit_account
+    (user_id,
+    total_amount,
+    available_amount,
+    account_status,
+    create_time,
+    update_time)
+    values
+    (#{userId}, #{totalAmount}, #{availableAmount}, #{accountStatus}, now(), now())
+  </insert>
+
+  <update id="updateAddAmount" parameterType="io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount">
+    update user_credit_account
+    set total_amount = total_amount + #{totalAmount},
+    available_amount = available_amount + #{availableAmount},
+    update_time = now()
+    where user_id = #{userId}
+  </update>
+
+</mapper>
