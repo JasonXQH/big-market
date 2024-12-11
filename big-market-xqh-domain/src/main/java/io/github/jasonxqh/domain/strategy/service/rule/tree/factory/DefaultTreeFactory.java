@@ -47,6 +47,8 @@ public class DefaultTreeFactory {
         private Integer awardId;
         /** 抽奖奖品规则 */
         private String awardRuleValue;
+
+        private Integer awardConfig;
     }
 
 //    @Getter

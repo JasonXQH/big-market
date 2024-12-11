@@ -7,7 +7,10 @@ import io.github.jasonxqh.api.dto.ActivityDrawResponseDTO;
 import io.github.jasonxqh.api.dto.UserActivityAccountRequestDTO;
 import io.github.jasonxqh.api.dto.UserActivityAccountResponseDTO;
 import io.github.jasonxqh.api.response.Response;
+import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
+import io.github.jasonxqh.domain.strategy.service.armory.IStrategyArmory;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,10 +28,17 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class RaffleActivityControllerTest {
-
+    @Resource
+    private IActivitySkuArmory activityArmory;
+    @Resource
+    private IStrategyArmory strategyArmory;
     @Resource
     private IRaffleActivityService raffleActivityService;
-
+    @Before
+    public void setUp() {
+        log.info("装配活动：{}", activityArmory.assembleActivitySkuByActivityId(100301L));
+        log.info("装配活动：{}",  strategyArmory.assembleLotteryStrategyByActivityId(100301L));
+    }
     @Test
     public void test_armory() {
         Response<Boolean> response = raffleActivityService.activityArmory(100301L);
@@ -37,7 +47,7 @@ public class RaffleActivityControllerTest {
 
     @Test
     public void test_draw() {
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10; i++) {
             ActivityDrawRequestDTO request = new ActivityDrawRequestDTO();
             request.setActivityId(100301L);
             request.setUserId("xiaofuge");
@@ -50,23 +60,24 @@ public class RaffleActivityControllerTest {
 
     @Test
     public void test_blacklist_draw() throws InterruptedException {
-        ActivityDrawRequestDTO request = new ActivityDrawRequestDTO();
-        request.setActivityId(100301L);
-        request.setUserId("user001");
-        Response<ActivityDrawResponseDTO> response = raffleActivityService.draw(request);
 
-        log.info("请求参数：{}", JSON.toJSONString(request));
-        log.info("测试结果：{}", JSON.toJSONString(response));
+        for (int i = 0; i < 10; i++) {
+            ActivityDrawRequestDTO request = new ActivityDrawRequestDTO();
+            request.setActivityId(100301L);
+            request.setUserId("user003");
+            Response<ActivityDrawResponseDTO> response = raffleActivityService.draw(request);
 
+            log.info("请求参数：{}", JSON.toJSONString(request));
+            log.info("测试结果：{}", JSON.toJSONString(response));
+        }
         // 让程序挺住方便测试，也可以去掉
         new CountDownLatch(1).await();
     }
 
     @Test
     public void test_calendarSignRebate() throws InterruptedException {
-        Response<Boolean> response = raffleActivityService.calendarSignRebate("user003");
+        Response<Boolean> response = raffleActivityService.calendarSignRebate("xiaofuge");
         log.info("测试结果：{}", JSON.toJSONString(response));
-
         // 让程序挺住方便测试，也可以去掉
         new CountDownLatch(1).await();
     }

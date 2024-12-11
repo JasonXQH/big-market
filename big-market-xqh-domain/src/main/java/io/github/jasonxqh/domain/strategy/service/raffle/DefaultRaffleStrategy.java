@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.strategy.service.raffle;
 
+import io.github.jasonxqh.domain.award.adapter.repository.IAwardRepository;
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleTreeVO;
@@ -31,8 +32,8 @@ import java.util.List;
 public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRaffleAward,IRaffleStock {
 
 
-    public DefaultRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
-        super(strategyRepository, strategyDispatch, chainFactory, treeFactory);
+    public DefaultRaffleStrategy(IAwardRepository awardRepository, IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
+        super(awardRepository,strategyRepository, strategyDispatch, chainFactory, treeFactory);
     }
 
     @Override
@@ -51,7 +52,6 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
         StrategyAwardRuleModelVO strategyAwardRuleModelVO = strategyRepository.queryStrategyAwardRuleModelVO(strategyId, awardId);
         if(strategyAwardRuleModelVO == null) {
             return DefaultTreeFactory.StrategyAwardVO.builder().awardId(awardId).build();
-
         }
         log.info("strategyAwardRuleModelVO.getRuleModels :{}", strategyAwardRuleModelVO.getRuleModels());
         RuleTreeVO ruleTreeVO = strategyRepository.queryRuleTreeVOByTreeId(strategyAwardRuleModelVO.getRuleModels());

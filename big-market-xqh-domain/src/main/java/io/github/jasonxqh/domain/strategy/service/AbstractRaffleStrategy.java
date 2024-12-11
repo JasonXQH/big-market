@@ -1,5 +1,6 @@
 package io.github.jasonxqh.domain.strategy.service;
 
+import io.github.jasonxqh.domain.award.adapter.repository.IAwardRepository;
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
@@ -22,16 +23,20 @@ import java.util.Date;
  **/
 @Slf4j
 public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
-    protected IStrategyRepository strategyRepository;
+    protected  IAwardRepository awardRepository;
+    protected  IStrategyRepository strategyRepository;
 
-    protected IStrategyDispatch strategyDispatch;
+    protected  IStrategyDispatch strategyDispatch;
 
-    protected DefaultChainFactory chainFactory;
+    protected  DefaultChainFactory chainFactory;
 
-    protected DefaultTreeFactory treeFactory;
+    protected  DefaultTreeFactory treeFactory;
 
 
-    public AbstractRaffleStrategy(IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
+
+    public AbstractRaffleStrategy(IAwardRepository awardRepository,IStrategyRepository strategyRepository, IStrategyDispatch strategyDispatch, DefaultChainFactory chainFactory, DefaultTreeFactory treeFactory) {
+        this.awardRepository = awardRepository;
+
         this.strategyRepository = strategyRepository;
         this.strategyDispatch = strategyDispatch;
         this.chainFactory = chainFactory;

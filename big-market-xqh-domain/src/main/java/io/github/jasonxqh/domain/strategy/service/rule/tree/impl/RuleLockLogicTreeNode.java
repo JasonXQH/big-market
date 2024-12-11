@@ -27,7 +27,7 @@ public class RuleLockLogicTreeNode implements ILogicTreeNode {
     @Override
     public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDateTime) {
 
-        log.info("规则树过滤-次数锁节点 userId:{} strategyId:{} awardId:{}", userId, strategyId,awardId);
+        log.info("决策树引擎 [规则过滤-次数锁节点] userId:{} strategyId:{} awardId:{}", userId, strategyId,awardId);
         long raffleCount = 0L;
         try {
             raffleCount = Long.parseLong(ruleValue);

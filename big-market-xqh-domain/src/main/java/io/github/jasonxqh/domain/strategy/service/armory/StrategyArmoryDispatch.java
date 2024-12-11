@@ -38,7 +38,6 @@ public class StrategyArmoryDispatch implements IStrategyArmory,IStrategyDispatch
             Integer awardId = strategyAwardEntity.getAwardId();
             Integer awardCount = strategyAwardEntity.getAwardCount();
             cacheStrategyCount(strategyId,awardId,awardCount);
-
         }
         //3.1 默认装配配置[全量抽奖概率]
         //3.2 权重策略配置，适用于rule_weight权重规则配置

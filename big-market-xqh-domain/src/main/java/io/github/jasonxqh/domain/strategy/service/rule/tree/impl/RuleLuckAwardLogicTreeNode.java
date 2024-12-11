@@ -28,6 +28,7 @@ public class RuleLuckAwardLogicTreeNode implements ILogicTreeNode {
 
     @Override
     public DefaultTreeFactory.TreeActionEntity logic(String userId, Long strategyId, Integer awardId, String ruleValue, Date endDateTime) {
+        log.info("决策树引擎 [规则过滤-兜底奖品] userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);
         String[] ruleParts = ruleValue.split(Constants.COLON);
         if (ruleParts.length == 0) {
             log.error("规则过滤-兜底奖品，兜底奖品未配置报警 userId:{} strategyId:{} awardId:{}", userId, strategyId, awardId);

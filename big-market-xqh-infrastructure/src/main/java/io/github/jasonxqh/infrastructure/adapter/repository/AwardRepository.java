@@ -8,6 +8,7 @@ import io.github.jasonxqh.domain.award.model.aggregate.UserAwardRecordAggregate;
 import io.github.jasonxqh.domain.award.model.entity.TaskEntity;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
 import io.github.jasonxqh.domain.award.model.entity.UserCreditRandomAwardEntity;
+import io.github.jasonxqh.domain.award.model.vo.AccountStatusVO;
 import io.github.jasonxqh.infrastructure.dao.*;
 import io.github.jasonxqh.infrastructure.dao.po.Task;
 import io.github.jasonxqh.infrastructure.dao.po.award.UserAwardRecord;
@@ -163,6 +164,7 @@ public class AwardRepository implements IAwardRepository {
                 .userId(userId)
                 .totalAmount(userCreditRandomAwardEntity.getCreditAmount())
                 .availableAmount(userCreditRandomAwardEntity.getCreditAmount())
+                .accountStatus(AccountStatusVO.open.getCode())
                 .build();
 
         try{

@@ -46,7 +46,7 @@ public class AwardService implements IAwardService {
         sendAwardMessage.setAwardId(userAwardRecordEntity.getAwardId());
         sendAwardMessage.setAwardConfig(userAwardRecordEntity.getAwardConfig());
         sendAwardMessage.setOrderId(userAwardRecordEntity.getOrderId());
-
+        sendAwardMessage.setAwardConfig(userAwardRecordEntity.getAwardConfig());
         BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage> sendAwardMessageEventMessage = sendAwardMessageEvent.buildEventMessage(sendAwardMessage);
         //3.构造Task
         TaskEntity taskEntity = new TaskEntity();

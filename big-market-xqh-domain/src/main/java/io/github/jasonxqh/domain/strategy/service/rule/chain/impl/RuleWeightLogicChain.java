@@ -3,9 +3,11 @@ package io.github.jasonxqh.domain.strategy.service.rule.chain.impl;
 import io.github.jasonxqh.domain.strategy.adapter.repository.IStrategyRepository;
 import io.github.jasonxqh.domain.strategy.model.entity.RuleActionEntity;
 import io.github.jasonxqh.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyDispatch;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.AbstractLogicChain;
 import io.github.jasonxqh.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+import io.github.jasonxqh.domain.strategy.service.rule.tree.factory.DefaultTreeFactory;
 import io.github.jasonxqh.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,11 +38,8 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
         log.info("抽奖责任链-权重 userId:{} strategyId:{} ruleModel:{} ",userId, strategyId,ruleModel());
         String ruleValue = strategyRepository.queryStrategyRuleValue( strategyId,ruleModel());
 
-        //4000:102,103,104,105 5000:102,103,104,105,106,107 6000:102,103,104,105,106,107,108,109
-
-        //["4000:102,103,104,105" "5000:102,103,104,105,106,107" "6000:102,103,104,105,106,107,108,109"]
+        //10:102,103 70:106,107 1000:104,105
         // Stream to find the maximum weight that does not exceed the score
-
         // 将权重和原始字符串映射存储在 Map 中
         Map<Long, String> analyticalValueGroup = Arrays.stream(ruleValue.split(Constants.SPACE))
                 .map(group -> {
@@ -56,20 +55,20 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
         Integer userScore = strategyRepository.queryActivityAccountTotalUseCount(userId, strategyId);
         // 使用stream找出最大的不超过score的权重值
         Long nextValue = analyticalValueGroup.keySet().stream()
-                .filter(weight -> weight <= userScore) // 过滤出小于等于score的权重
+                .filter(weight -> weight <= userScore)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
 
-
         if(null != nextValue) {
             Integer randomAwardId = strategyDispatch.getRandomAwardId(strategyId, analyticalValueGroup.get(nextValue));
-            log.info("抽奖责任链-权重接管 userId:{} strategyId:{} ruleModel:{} ",userId, strategyId,ruleModel());
+            log.info("抽奖责任链-权重接管 userId:{} strategyId:{} ruleModel:{} userScore:{} ,nextValue:{} ",userId, strategyId,ruleModel(),userScore,nextValue);
+            //这里，不用库存扣减，因为达到权重抽奖，告诉无库存了。那么会有大量客诉。
             return DefaultChainFactory.StrategyAwardVO.builder()
                     .awardId(randomAwardId)
                     .logicModel(ruleModel())
                     .build();
         }
-        log.info("抽奖责任链-权重放行 userId:{} strategyId:{} ruleModel:{} ", userId, strategyId,ruleModel());
+        log.info("抽奖责任链-权重放行 userId:{} strategyId:{} ruleModel:{} userScore:{} ", userId, strategyId,ruleModel(),userScore);
         return next().logic(userId, strategyId);
     }
 

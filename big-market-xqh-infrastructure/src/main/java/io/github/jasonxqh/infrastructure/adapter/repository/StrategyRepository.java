@@ -291,7 +291,7 @@ public class StrategyRepository implements IStrategyRepository {
     @Override
     public void awardStockConsumeSendQueue(StrategyAwardStockKeyVO strategyAwardStockKeyVO) {
         RDelayedQueue<StrategyAwardStockKeyVO> awardDelayedQueue = queueManager.getOrCreateStrategyAwardStockKeyVORDelayedQueue(strategyAwardStockKeyVO);
-        log.info("向奖品专用延迟队列传入Award VO: {}", JSON.toJSON(strategyAwardStockKeyVO));
+        log.info("向奖品专用延迟队列传入Award VO 供库存扣减使用: {}", JSON.toJSON(strategyAwardStockKeyVO));
         awardDelayedQueue.offer(strategyAwardStockKeyVO,3, TimeUnit.SECONDS);
     }
 
