@@ -1,4 +1,4 @@
-package io.github.jasonxqh.domain.award.model.entity;
+package io.github.jasonxqh.domain.credit.model.entity;
 
 import io.github.jasonxqh.domain.award.model.vo.AccountStatusVO;
 import lombok.AllArgsConstructor;
