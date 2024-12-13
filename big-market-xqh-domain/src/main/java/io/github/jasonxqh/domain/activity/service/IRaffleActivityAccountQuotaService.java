@@ -1,9 +1,6 @@
 package io.github.jasonxqh.domain.activity.service;
 
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityOrderEntity;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityShopCartEntity;
-import io.github.jasonxqh.domain.activity.model.entity.SkuRechargeEntity;
+import io.github.jasonxqh.domain.activity.model.entity.*;
 
 public interface IRaffleActivityAccountQuotaService {
     /**
@@ -37,4 +34,6 @@ public interface IRaffleActivityAccountQuotaService {
     RaffleActivityAccountEntity queryActivityAccountEntity(String userId,Long activityId);
 
     Integer queryActivityAccountPartakeCount(String userId, Long activityId);
+
+    void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
 }

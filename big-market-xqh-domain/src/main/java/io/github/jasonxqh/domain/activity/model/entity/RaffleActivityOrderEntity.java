@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -66,6 +67,10 @@ public class RaffleActivityOrderEntity {
      * 月次数
      */
     private Integer monthCount;
+    /**
+     * 支付金额
+     */
+    private BigDecimal payAmount;
 
     /**
      * 外部透传字段
@@ -73,8 +78,7 @@ public class RaffleActivityOrderEntity {
     private String outBusinessNo;
 
     /**
-     * 订单状态（complete）
+     * 订单状态（complete完成,wait_pay等待付款）
      */
     private OrderStateVO state;
-
 }

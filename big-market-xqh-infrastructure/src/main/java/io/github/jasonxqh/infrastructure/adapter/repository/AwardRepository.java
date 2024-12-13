@@ -20,11 +20,13 @@ import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -108,12 +110,13 @@ public class AwardRepository implements IAwardRepository {
         }finally {
             routerStrategy.clear();
         }
-        //TODO 用线程池的方式实现：发成功了就成功，失败的话，就重新发送
+        //用线程池的方式实现：发成功了就成功，失败的话，就重新发送
         try {
             // 发送消息【在事务外执行，如果失败还有任务补偿】
             eventPublisher.publish(task.getTopic(), task.getMessage());
             // 更新数据库记录，task 任务表
             taskDao.updateTaskSendMessageCompleted(task);
+            log.info("写入中奖记录，发送MQ消息完成 userId: {} orderId:{} topic: {}", userId, userAwardRecordEntity.getOrderId(), task.getTopic());
         } catch (Exception e) {
             log.error("写入中奖记录，发送MQ消息失败 userId: {} topic: {}", userId, task.getTopic());
             taskDao.updateTaskSendMessageFail( task);
@@ -167,15 +170,19 @@ public class AwardRepository implements IAwardRepository {
                 .accountStatus(AccountStatusVO.open.getCode())
                 .build();
 
+        RLock lock = redisService.getLock(Constants.RedisKey.ACTIVITY_ACCOUNT_LOCK + userId);
         try{
+            lock.lock(3, TimeUnit.SECONDS);
             routerStrategy.doRouter(userId);
             //编程式事务
             transactionTemplate.execute(status -> {
                 try{
                     //写入任务,存在就更新，不存在就插入
-                    int updateAccountCount = userCreditAccountDao.updateAddAmount(userCreditAccountReq);
-                    if (0 == updateAccountCount) {
+                    UserCreditAccount userCreditAccountRes = userCreditAccountDao.queryUserCreditAccountByUserId(userCreditAccountReq);
+                    if (null == userCreditAccountRes) {
                         userCreditAccountDao.insert(userCreditAccountReq);
+                    } else {
+                        userCreditAccountDao.updateAddAmount(userCreditAccountReq);
                     }
                     //更新中奖单中的发奖状态
                     int count = userAwardRecordDao.updateUserAwardRecord(userAwardRecordReq);
@@ -193,6 +200,7 @@ public class AwardRepository implements IAwardRepository {
             });
         }finally {
             routerStrategy.clear();
+            lock.unlock();
         }
 
     }

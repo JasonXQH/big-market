@@ -5,6 +5,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import io.github.jasonxqh.domain.activity.model.entity.SkuRechargeEntity;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
+import io.github.jasonxqh.domain.credit.model.entity.TradeEntity;
+import io.github.jasonxqh.domain.credit.model.vo.TradeNameVO;
+import io.github.jasonxqh.domain.credit.model.vo.TradeTypeVO;
+import io.github.jasonxqh.domain.credit.service.ICreditAdjustService;
 import io.github.jasonxqh.domain.rebate.model.event.SendBehaviorRebateEvent;
 import io.github.jasonxqh.domain.rebate.model.vo.RebateTypeVO;
 import io.github.jasonxqh.domain.strategy.model.vo.StrategyAwardStockKeyVO;
@@ -18,13 +22,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 @Slf4j
 @Component
 public class SendBehaviorRebateCustomer {
     @Value("${spring.rabbitmq.topic.send_behavior_rebate}")
     private String topic;
-
+    @Resource
+    private ICreditAdjustService creditAdjustService;
     @Resource
     private IRaffleActivityAccountQuotaService accountQuotaService;
 
@@ -39,25 +45,33 @@ public class SendBehaviorRebateCustomer {
             //如9011，就是sku的编号9011
             String rebateConfig = behaviorRebateMessage.getRebateConfig();
             String bizId = behaviorRebateMessage.getBiz_id();
-            if (! RebateTypeVO.SKU.getCode().equals(behaviorRebateMessage.getRebateType())) {
-                log.info("监听用户行为返利消息 - 非sku奖励暂时不处理 topic: {} message: {}", topic, message);
-                return;
+            switch (behaviorRebateMessage.getRebateType()) {
+                case "sku":
+                    SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
+                    skuRechargeEntity.setUserId(behaviorRebateMessage.getUserId());
+                    skuRechargeEntity.setSku(Long.valueOf(behaviorRebateMessage.getRebateConfig()));
+                    skuRechargeEntity.setOutBusinessNo(bizId);
+                    accountQuotaService.createOrder(skuRechargeEntity);
+                    break;
+                case "integral":
+                    TradeEntity tradeEntity = new TradeEntity();
+                    tradeEntity.setUserId(behaviorRebateMessage.getUserId());
+                    tradeEntity.setTradeName(TradeNameVO.REBATE);
+                    tradeEntity.setTradeType(TradeTypeVO.forward);
+                    tradeEntity.setAmount(new BigDecimal(behaviorRebateMessage.getRebateConfig()));
+                    tradeEntity.setOutBusinessNo(bizId);
+                    creditAdjustService.createOrder(tradeEntity);
+                    break;
             }
-            SkuRechargeEntity skuRechargeEntity = new SkuRechargeEntity();
-            skuRechargeEntity.setSku(Long.valueOf(rebateConfig));
-            skuRechargeEntity.setUserId(userId);
-            skuRechargeEntity.setOutBusinessNo(bizId);
-            String order = accountQuotaService.createOrder(skuRechargeEntity);
-            log.info("监听用户行为返利记录消息，增加用户配额 topic: {} userId: {} bizId{} order:{}", topic, userId, bizId,order);
         } catch (AppException e) {
             if (ResponseCode.INDEX_DUP.getCode().equals(e.getCode())) {
                 log.warn("监听用户行为返利消息，消费重复 topic: {} message: {}", topic, message, e);
                 return;
             }
-            throw e;
+//            throw e;
         } catch (Exception e) {
             log.error("监听用户行为返利消息，消费失败 topic: {} message: {}", topic, message, e);
-            throw e;
+//            throw e;
         }
     }
 }

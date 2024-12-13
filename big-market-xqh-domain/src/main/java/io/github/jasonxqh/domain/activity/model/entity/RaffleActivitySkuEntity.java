@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -33,6 +34,10 @@ public class RaffleActivitySkuEntity {
     */
     private Integer stockCount;
 
+    /**
+    *  商品价格（积分）
+    * */
+    private BigDecimal productAmount;
     /**
     * 剩余库存
     */
