@@ -50,6 +50,7 @@ public class CreditAdjustSuccessMessageEvent extends BaseEvent<CreditAdjustSucce
          * 业务仿重ID - 外部透传。返利、行为等唯一标识
          */
         private String outBusinessNo;
+
     }
 
     @Override

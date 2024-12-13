@@ -98,6 +98,10 @@
       update raffle_activity_order
       set   state       = 'complete',
             update_time = now()
-      where user_id = #{userId} and out_business_no = #{outBusinessNo} and state = 'wait_pay'
+      where user_id = #{userId}
+            and out_business_no = #{outBusinessNo}
+            and state = 'wait_pay'
+            and pay_amount != null
+
   </update>
 </mapper>
