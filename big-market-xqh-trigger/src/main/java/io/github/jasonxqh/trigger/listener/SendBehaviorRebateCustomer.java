@@ -68,10 +68,10 @@ public class SendBehaviorRebateCustomer {
                 log.warn("监听用户行为返利消息，消费重复 topic: {} message: {}", topic, message, e);
                 return;
             }
-            throw e;
+//            throw e;
         } catch (Exception e) {
             log.error("监听用户行为返利消息，消费失败 topic: {} message: {}", topic, message, e);
-            throw e;
+//            throw e;
         }
     }
 }

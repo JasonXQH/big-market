@@ -42,6 +42,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         Long activityId = partakeRaffleActivityEntity.getActivityId();
         String userId = partakeRaffleActivityEntity.getUserId();
         Date currentDate = new Date();
+        log.info("创建活动抽奖单开始 userId:{} activityId:{}", userId, activityId);
         if (activityId != null && userId != null) {
             StringUtils.isEmpty(userId);
         }
@@ -50,6 +51,7 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         RaffleActivityEntity raffleActivityEntity = activityRepository.queryActivityByActivityId(activityId);
         //校验活动状态
         if(currentDate.before(raffleActivityEntity.getBeginDateTime())||currentDate.after(raffleActivityEntity.getEndDateTime())){
+            log.error("创建活动抽奖单失败，活动状态未开启 activityId:{} state:{}", activityId, raffleActivityEntity.getState());
             throw new AppException(ResponseCode.ACTIVITY_DATE_ERROR.getCode(),ResponseCode.ACTIVITY_DATE_ERROR.getInfo());
         }
         //校验活动日期

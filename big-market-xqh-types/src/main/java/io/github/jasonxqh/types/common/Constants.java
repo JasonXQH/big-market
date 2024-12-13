@@ -8,6 +8,7 @@ public class Constants {
     public final static String UNDERLINE = "_";
 
     public static class RedisKey {
+        public static  String USER_CREDIT_ACCOUNT_LOCK = "user_credit_account_lock_" ;
         public static String STRATEGY_KEY = "big_market_strategy_key_";
         public static String STRATEGY_AWARD_KEY = "big_market_strategy_award_key_";
         public static String STRATEGY_AWARD_LIST_KEY = "big_market_strategy_award_list_key_";
@@ -25,7 +26,8 @@ public class Constants {
         public static String STRATEGY_RULE_WEIGHT_KEY = "strategy_rule_weight_key_";
         public static String AWARD_CONFIG_KEY = "award_config_key_";
         public static String AWARD_KEY = "award_key_";
-
+        public static String ACTIVITY_ACCOUNT_LOCK = "activity_account_lock_";
+        public static String ACTIVITY_ACCOUNT_UPDATE_LOCK = "activity_account_update_lock_";
     }
 
 }

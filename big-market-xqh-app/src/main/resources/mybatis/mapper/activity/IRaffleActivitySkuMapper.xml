@@ -7,6 +7,7 @@
     <result column="activity_id" jdbcType="BIGINT" property="activityId" />
     <result column="activity_count_id" jdbcType="BIGINT" property="activityCountId" />
     <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
+    <result column="product_amount" jdbcType="DECIMAL" property="productAmount" />
     <result column="stock_count_surplus" jdbcType="INTEGER" property="stockCountSurplus" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
@@ -17,6 +18,7 @@
               activity_id,
              activity_count_id,
              stock_count,
+              product_amount,
              stock_count_surplus
      FROM raffle_activity_sku
     WHERE sku = #{sku} 
@@ -39,6 +41,7 @@
               activity_id,
               activity_count_id,
               stock_count,
+              product_amount,
               stock_count_surplus
       FROM raffle_activity_sku
       WHERE activity_id = #{activityId}

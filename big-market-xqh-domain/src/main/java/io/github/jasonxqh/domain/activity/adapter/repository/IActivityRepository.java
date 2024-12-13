@@ -19,7 +19,6 @@ public interface IActivityRepository {
 
     RaffleActivityCountEntity queryRaffleActivityCountByActivityCountId(Long activityCountId);
 
-    void doSaveSkuQuotaOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
 
     void storeActivitySkuStockCount(String key, Integer skuCount);
 
@@ -46,7 +45,6 @@ public interface IActivityRepository {
 
     RaffleActivityAccountDayEntity queryActivityAccountDayByUserId(String userId, Long activityId, String month);
 
-    void doSavePartakeOrder(CreatePartakeOrderAggregate partakeOrderAggregate);
 
     List<RaffleActivitySkuEntity> queryActivitySkuByActivityId(Long activityId);
 
@@ -56,4 +54,10 @@ public interface IActivityRepository {
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
 
     Integer queryActivityAccountPartakeCount(String userId, Long activityId);
+
+    void doSaveNoPayOrder(CreateSkuQuotaOrderAggregate createQuotaOrderAggregate);
+    void doSavePartakeOrder(CreatePartakeOrderAggregate partakeOrderAggregate);
+    void doSaveCreditPayOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
+
+    void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
 }

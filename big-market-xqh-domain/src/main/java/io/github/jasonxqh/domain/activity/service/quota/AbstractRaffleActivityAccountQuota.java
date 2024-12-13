@@ -5,6 +5,7 @@ import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateSkuQuotaOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
+import io.github.jasonxqh.domain.activity.service.quota.policy.ITradePolicy;
 import io.github.jasonxqh.domain.activity.service.quota.rule.chain.IActionChain;
 import io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory.DefaultActionChainFactory;
 import io.github.jasonxqh.types.enums.ResponseCode;
@@ -12,14 +13,17 @@ import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
+
 @Slf4j
 public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityAccountQuotaSupport implements IRaffleActivityAccountQuotaService {
 
+    private final Map<String, ITradePolicy> tradePolicyGroup;
 
-    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory) {
+    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory, Map<String, ITradePolicy> tradePolicyGroup) {
         super(activityRepository, actionChainFactory);
+        this.tradePolicyGroup = tradePolicyGroup;
     }
-
 
     @Override
     public RaffleActivityOrderEntity createRaffleActivityOrder(RaffleActivityShopCartEntity shopCartEntity) {
@@ -30,8 +34,6 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         //3.查询次数信息
         RaffleActivityCountEntity countEntity = activityRepository.queryRaffleActivityCountByActivityCountId(raffleActivitySkuEntity.getActivityCountId());
         log.info("查询结果：{} {} {} ", JSON.toJSON(raffleActivitySkuEntity), JSON.toJSON(activityEntity), JSON.toJSON(countEntity));
-
-
         return null;
     }
     //用户要签到、打卡、下单 等行为，才会创建一个订单，实现SKU库存扣减和增加抽奖次数
@@ -56,14 +58,17 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         IActionChain actionChain = actionChainFactory.openLogicChain();
         //检验成功，则会扣减activity的sku库存，防止超卖(超卖次数)
         boolean success = actionChain.action(raffleActivitySkuEntity, activityEntity, countEntity);
-        //4.构建抽奖单聚合对象，增加用户的抽奖次数。
+        //4. 构建抽奖单聚合对象，增加用户的抽奖次数。
         CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate = buildOrderAggregate(skuRechargeEntity, raffleActivitySkuEntity, activityEntity, countEntity);
-        //5.保存抽奖单
-        doSaveOrder(createSkuQuotaOrderAggregate);
+        // 5. 交易策略 - 【积分兑换，支付类订单】【返利无支付交易订单，直接充值到账】【订单状态变更交易类型策略】
+        ITradePolicy tradePolicy = tradePolicyGroup.get(skuRechargeEntity.getOrderTradeType().getCode());
+        tradePolicy.trade(createSkuQuotaOrderAggregate);
         //6.返回单号
         return createSkuQuotaOrderAggregate.getRaffleActivityOrderEntity().getOrderId();
     }
+
+
     protected abstract CreateSkuQuotaOrderAggregate buildOrderAggregate(SkuRechargeEntity skuRechargeEntity, RaffleActivitySkuEntity activitySkuEntity, RaffleActivityEntity  activityEntity, RaffleActivityCountEntity activityCountEntity);
 
-    protected abstract void doSaveOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
+//    protected abstract void doSaveOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
 }

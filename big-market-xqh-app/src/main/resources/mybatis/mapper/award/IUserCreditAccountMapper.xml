@@ -31,4 +31,17 @@
     where user_id = #{userId}
   </update>
 
+  <select id="queryUserCreditAccountByUserId" parameterType="io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount" resultMap="BaseResultMap">
+    select user_id,total_amount,available_amount,account_status
+    from user_credit_account
+    where user_id = #{userId}
+  </select>
+
+  <update id="updateSubstractAmount" parameterType="io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount">
+    update user_credit_account
+    set
+      available_amount = available_amount - #{availableAmount},
+      update_time = now()
+    where user_id = #{userId}
+  </update>
 </mapper>

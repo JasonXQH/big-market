@@ -1,5 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao.po.activity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 
@@ -34,6 +35,11 @@ public class RaffleActivitySku {
     * 剩余库存
     */
     private Integer stockCountSurplus;
+
+    /**
+    *  购买价格
+    * */
+    private BigDecimal productAmount;
 
     /**
     * 创建时间

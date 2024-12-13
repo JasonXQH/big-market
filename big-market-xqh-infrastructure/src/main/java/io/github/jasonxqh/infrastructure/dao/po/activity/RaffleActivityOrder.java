@@ -1,5 +1,6 @@
 package io.github.jasonxqh.infrastructure.dao.po.activity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 
@@ -63,6 +64,10 @@ public class RaffleActivityOrder {
      */
     private Integer monthCount;
 
+    /**
+     * 订单金额
+     */
+    private BigDecimal payAmount;
     /**
      * 订单状态（complete）
      */
