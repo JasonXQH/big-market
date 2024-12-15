@@ -595,14 +595,17 @@ public class ActivityRepository implements IActivityRepository {
 
     @Override
     public void updateOrder(DeliveryOrderEntity deliveryOrderEntity) {
+        String userId = deliveryOrderEntity.getUserId();
+        String outBusinessNo = deliveryOrderEntity.getOutBusinessNo();
+        log.info("开始更新账户抽奖次数，userId:{} , outBusinessNo:{}",userId,outBusinessNo);
         RLock lock = redisService.getLock(Constants.RedisKey.ACTIVITY_ACCOUNT_UPDATE_LOCK + deliveryOrderEntity.getUserId());
         try {
             lock.lock(3, TimeUnit.SECONDS);
 
             // 查询订单
             RaffleActivityOrder raffleActivityOrderReq = new RaffleActivityOrder();
-            raffleActivityOrderReq.setUserId(deliveryOrderEntity.getUserId());
-            raffleActivityOrderReq.setOutBusinessNo(deliveryOrderEntity.getOutBusinessNo());
+            raffleActivityOrderReq.setUserId(userId);
+            raffleActivityOrderReq.setOutBusinessNo(outBusinessNo);
             //null
             RaffleActivityOrder raffleActivityOrderRes = raffleActivityOrderDao.queryRaffleActivityOrderByUserIdAndOutBN(raffleActivityOrderReq);
             if(raffleActivityOrderRes == null) {

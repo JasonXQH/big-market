@@ -39,4 +39,7 @@ public interface  IRaffleActivityService {
      * @return 返回结果「总额度、月额度、日额度」
      */
     Response<UserActivityAccountResponseDTO> queryUserActivityAccount(UserActivityAccountRequestDTO request);
+
+
+    Response<Boolean> creditPayExchangeSku( SkuProductShopCartRequestDTO request);
 }

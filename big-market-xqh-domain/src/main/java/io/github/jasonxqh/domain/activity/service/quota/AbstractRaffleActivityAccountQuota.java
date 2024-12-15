@@ -38,7 +38,7 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
     }
     //用户要签到、打卡、下单 等行为，才会创建一个订单，实现SKU库存扣减和增加抽奖次数
     @Override
-    public String createOrder(SkuRechargeEntity skuRechargeEntity) {
+    public UnpaidActivityOrderEntity createOrder(SkuRechargeEntity skuRechargeEntity) {
 
         //1.参数校验
         String userId = skuRechargeEntity.getUserId();
@@ -64,7 +64,13 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         ITradePolicy tradePolicy = tradePolicyGroup.get(skuRechargeEntity.getOrderTradeType().getCode());
         tradePolicy.trade(createSkuQuotaOrderAggregate);
         //6.返回单号
-        return createSkuQuotaOrderAggregate.getRaffleActivityOrderEntity().getOrderId();
+        return UnpaidActivityOrderEntity.builder()
+                .userId(userId)
+                .orderId(createSkuQuotaOrderAggregate.getRaffleActivityOrderEntity().getOrderId())
+                .outBusinessNo(outBusinessNo)
+                .payAmount(createSkuQuotaOrderAggregate.getRaffleActivityOrderEntity().getPayAmount())
+                .build();
+//        return createSkuQuotaOrderAggregate.getRaffleActivityOrderEntity().getOrderId();
     }
 
 

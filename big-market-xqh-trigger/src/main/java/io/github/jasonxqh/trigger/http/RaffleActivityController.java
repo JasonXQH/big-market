@@ -2,41 +2,37 @@ package io.github.jasonxqh.trigger.http;
 
 import com.alibaba.fastjson.JSON;
 import io.github.jasonxqh.api.IRaffleActivityService;
-import io.github.jasonxqh.api.IRaffleStrategyService;
 import io.github.jasonxqh.api.dto.*;
 import io.github.jasonxqh.api.response.Response;
-import io.github.jasonxqh.domain.activity.model.entity.PartakeRaffleActivityEntity;
-import io.github.jasonxqh.domain.activity.model.entity.RaffleActivityAccountEntity;
-import io.github.jasonxqh.domain.activity.model.entity.UserRaffleOrderEntity;
+import io.github.jasonxqh.domain.activity.model.entity.*;
+import io.github.jasonxqh.domain.activity.model.valobj.OrderTradeTypeVO;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityPartakeService;
 import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
-import io.github.jasonxqh.domain.activity.service.quota.RaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
 import io.github.jasonxqh.domain.award.model.vo.AwardStateVO;
 import io.github.jasonxqh.domain.award.service.AwardService;
+import io.github.jasonxqh.domain.credit.model.entity.TradeEntity;
+import io.github.jasonxqh.domain.credit.model.vo.TradeNameVO;
+import io.github.jasonxqh.domain.credit.model.vo.TradeTypeVO;
+import io.github.jasonxqh.domain.credit.service.ICreditAdjustService;
 import io.github.jasonxqh.domain.rebate.model.entity.BehaviorEntity;
-import io.github.jasonxqh.domain.rebate.model.entity.UserBehaviorRebateOrderEntity;
 import io.github.jasonxqh.domain.rebate.model.vo.BehaviorTypeVO;
 import io.github.jasonxqh.domain.rebate.service.IBehaviorRebateService;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleAwardEntity;
 import io.github.jasonxqh.domain.strategy.model.entity.RaffleFactorEntity;
-import io.github.jasonxqh.domain.strategy.model.entity.StrategyAwardEntity;
-import io.github.jasonxqh.domain.strategy.service.IRaffleAward;
 import io.github.jasonxqh.domain.strategy.service.IRaffleStrategy;
 import io.github.jasonxqh.domain.strategy.service.armory.IStrategyArmory;
-import io.github.jasonxqh.types.common.Constants;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author : jasonxu
@@ -57,8 +53,8 @@ public class RaffleActivityController implements IRaffleActivityService {
     private final AwardService awardService;
     private final IBehaviorRebateService rebateService;
     private final IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
-
-    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService, IRaffleActivityPartakeService activityPartakeService, AwardService awardService, IBehaviorRebateService rebateService, IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService) {
+    private final ICreditAdjustService creditAdjustService;
+    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService, IRaffleActivityPartakeService activityPartakeService, AwardService awardService, IBehaviorRebateService rebateService, IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService, ICreditAdjustService creditAdjustService) {
         this.activitySkuArmory = activitySkuArmory;
         this.strategyArmory = strategyArmory;
         this.strategyService = strategyService;
@@ -66,6 +62,7 @@ public class RaffleActivityController implements IRaffleActivityService {
         this.awardService = awardService;
         this.rebateService = rebateService;
         this.raffleActivityAccountQuotaService = raffleActivityAccountQuotaService;
+        this.creditAdjustService = creditAdjustService;
     }
 
 
@@ -280,6 +277,49 @@ public class RaffleActivityController implements IRaffleActivityService {
             return Response.<UserActivityAccountResponseDTO>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    @RequestMapping(value = "credit_pay_exchange_sku", method = RequestMethod.POST)
+    @Override
+    public Response<Boolean> creditPayExchangeSku(@RequestBody SkuProductShopCartRequestDTO request) {
+        try {
+            String userId = request.getUserId();
+            Long sku = request.getSku();
+            log.info("积分兑换商品开始 userId:{} sku:{}",userId, sku);
+            if(StringUtils.isBlank(userId) || null == sku) {
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+            }
+            // 1. 创建兑换商品sku订单，outBusinessNo 每次创建出一个单号。
+            UnpaidActivityOrderEntity unpaidActivityOrder = raffleActivityAccountQuotaService.createOrder(SkuRechargeEntity.builder()
+                    .userId(request.getUserId())
+                    .sku(request.getSku())
+                    .outBusinessNo(RandomStringUtils.randomNumeric(12))
+                    .orderTradeType(OrderTradeTypeVO.credit_pay_trade)
+                    .build());
+            log.info("积分兑换商品，创建订单完成 userId:{} sku:{} outBusinessNo:{}", request.getUserId(), request.getSku(), unpaidActivityOrder.getOutBusinessNo());
+
+            // 2.支付兑换商品
+            String orderId = creditAdjustService.createOrder(TradeEntity.builder()
+                    .userId(unpaidActivityOrder.getUserId())
+                    .tradeName(TradeNameVO.CONVERT_SKU)
+                    .tradeType(TradeTypeVO.reverse)
+                    .amount(unpaidActivityOrder.getPayAmount().negate())
+                    .outBusinessNo(unpaidActivityOrder.getOutBusinessNo())
+                    .build());
+            log.info("积分兑换商品，支付订单完成  userId:{} sku:{} orderId:{}", request.getUserId(), request.getSku(), orderId);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(true)
+                    .build();
+        } catch (Exception e) {
+            log.error("积分兑换商品失败 userId:{} sku:{}", request.getUserId(), request.getSku(), e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .data(false)
                     .build();
         }
     }

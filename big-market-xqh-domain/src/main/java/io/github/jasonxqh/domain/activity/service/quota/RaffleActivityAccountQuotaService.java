@@ -42,7 +42,6 @@ public class RaffleActivityAccountQuotaService extends AbstractRaffleActivityAcc
                 .monthCount(activityCountEntity.getMonthCount())
                 .dayCount(activityCountEntity.getDayCount())
                 .payAmount(activitySkuEntity.getProductAmount())
-                .state(OrderStateVO.completed)
                 .outBusinessNo(skuRechargeEntity.getOutBusinessNo())
                 .build();
 
