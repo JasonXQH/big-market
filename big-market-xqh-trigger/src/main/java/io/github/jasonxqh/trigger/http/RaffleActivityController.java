@@ -8,11 +8,13 @@ import io.github.jasonxqh.domain.activity.model.entity.*;
 import io.github.jasonxqh.domain.activity.model.valobj.OrderTradeTypeVO;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityPartakeService;
+import io.github.jasonxqh.domain.activity.service.IRaffleActivitySkuProductService;
 import io.github.jasonxqh.domain.activity.service.armory.IActivitySkuArmory;
 import io.github.jasonxqh.domain.award.model.entity.UserAwardRecordEntity;
 import io.github.jasonxqh.domain.award.model.vo.AwardStateVO;
 import io.github.jasonxqh.domain.award.service.AwardService;
 import io.github.jasonxqh.domain.credit.model.entity.TradeEntity;
+import io.github.jasonxqh.domain.credit.model.entity.UserCreditAccountEntity;
 import io.github.jasonxqh.domain.credit.model.vo.TradeNameVO;
 import io.github.jasonxqh.domain.credit.model.vo.TradeTypeVO;
 import io.github.jasonxqh.domain.credit.service.ICreditAdjustService;
@@ -30,7 +32,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +58,8 @@ public class RaffleActivityController implements IRaffleActivityService {
     private final IBehaviorRebateService rebateService;
     private final IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService;
     private final ICreditAdjustService creditAdjustService;
-    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService, IRaffleActivityPartakeService activityPartakeService, AwardService awardService, IBehaviorRebateService rebateService, IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService, ICreditAdjustService creditAdjustService) {
+    private final IRaffleActivitySkuProductService raffleActivitySkuProductService;
+    public RaffleActivityController(IActivitySkuArmory activitySkuArmory, IStrategyArmory strategyArmory, IRaffleStrategy strategyService, IRaffleActivityPartakeService activityPartakeService, AwardService awardService, IBehaviorRebateService rebateService, IRaffleActivityAccountQuotaService raffleActivityAccountQuotaService, ICreditAdjustService creditAdjustService, IRaffleActivitySkuProductService raffleActivitySkuProductService) {
         this.activitySkuArmory = activitySkuArmory;
         this.strategyArmory = strategyArmory;
         this.strategyService = strategyService;
@@ -63,6 +68,7 @@ public class RaffleActivityController implements IRaffleActivityService {
         this.rebateService = rebateService;
         this.raffleActivityAccountQuotaService = raffleActivityAccountQuotaService;
         this.creditAdjustService = creditAdjustService;
+        this.raffleActivitySkuProductService = raffleActivitySkuProductService;
     }
 
 
@@ -324,6 +330,65 @@ public class RaffleActivityController implements IRaffleActivityService {
         }
     }
 
+    @Override
+    @RequestMapping(value = "query_sku_products", method = RequestMethod.POST)
+    public Response<List<SkuProductResponseDTO>> querySkuProductListByActivityId(@RequestParam Long activityId) {
+        try {
+            log.info("查询sku商品集合开始 activityId:{}", activityId);
+            // 1. 参数校验
+            if (null == activityId) {
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+            }
+            // 2. 查询商品&封装数据
+            List<SkuProductEntity> skuProductEntities = raffleActivitySkuProductService.querySkuProductEntityListByActivityId(activityId);
+            List<SkuProductResponseDTO> skuProductResponseDTOS = getSkuProductResponseDTOS(skuProductEntities);
+            log.info("查询sku商品集合完成 activityId:{} skuProductResponseDTOS:{}", activityId, JSON.toJSONString(skuProductResponseDTOS));
+            return Response.<List<SkuProductResponseDTO>>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(skuProductResponseDTOS)
+                    .build();
+        } catch (Exception e) {
+            log.error("查询sku商品集合失败 activityId:{}", activityId, e);
+            return Response.<List<SkuProductResponseDTO>>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
+
+    private static List<SkuProductResponseDTO> getSkuProductResponseDTOS(List<SkuProductEntity> skuProductEntities) {
+        List<SkuProductResponseDTO> skuProductResponseDTOS = new ArrayList<>(skuProductEntities.size());
+        for (SkuProductEntity skuProductEntity : skuProductEntities) {
+            SkuProductResponseDTO.ActivityCount activityCount = new SkuProductResponseDTO.ActivityCount();
+            activityCount.setTotalCount(skuProductEntity.getActivityCount().getTotalCount());
+            activityCount.setMonthCount(skuProductEntity.getActivityCount().getMonthCount());
+            activityCount.setDayCount(skuProductEntity.getActivityCount().getDayCount());
+            SkuProductResponseDTO skuProductResponseDTO = getSkuProductResponseDTO(skuProductEntity, activityCount);
+            skuProductResponseDTOS.add(skuProductResponseDTO);
+        }
+        return skuProductResponseDTOS;
+    }
+
+    @Override
+    @RequestMapping(value = "query_user_credit", method = RequestMethod.POST)
+    public Response<BigDecimal> queryUserCreditAccount(@RequestParam  String userId) {
+        try {
+            log.info("查询用户积分值开始 userId:{}", userId);
+            UserCreditAccountEntity creditAccountEntity = creditAdjustService.queryUserCreditAccount(userId);
+            log.info("查询用户积分值完成 userId:{} adjustAmount:{}", userId, creditAccountEntity.getAdjustAmount());
+            return Response.<BigDecimal>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(creditAccountEntity.getAdjustAmount())
+                    .build();
+        } catch (Exception e) {
+            return Response.<BigDecimal>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .build();
+        }
+    }
     private static UserActivityAccountResponseDTO getUserActivityAccountResponseDTO(RaffleActivityAccountEntity activityAccountEntity) {
         UserActivityAccountResponseDTO responseDTO = new UserActivityAccountResponseDTO();
         responseDTO.setTotalCount(activityAccountEntity.getTotalCount());
@@ -334,5 +399,15 @@ public class RaffleActivityController implements IRaffleActivityService {
         responseDTO.setDayCountSurplus(activityAccountEntity.getDayCountSurplus());
         return responseDTO;
     }
-
+    private static SkuProductResponseDTO getSkuProductResponseDTO(SkuProductEntity skuProductEntity, SkuProductResponseDTO.ActivityCount activityCount) {
+        SkuProductResponseDTO skuProductResponseDTO = new SkuProductResponseDTO();
+        skuProductResponseDTO.setSku(skuProductEntity.getSku());
+        skuProductResponseDTO.setActivityId(skuProductEntity.getActivityId());
+        skuProductResponseDTO.setActivityCountId(skuProductEntity.getActivityCountId());
+        skuProductResponseDTO.setStockCount(skuProductEntity.getStockCount());
+        skuProductResponseDTO.setStockCountSurplus(skuProductEntity.getStockCountSurplus());
+        skuProductResponseDTO.setProductAmount(skuProductEntity.getProductAmount());
+        skuProductResponseDTO.setActivityCount(activityCount);
+        return skuProductResponseDTO;
+    }
 }

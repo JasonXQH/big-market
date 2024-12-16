@@ -60,4 +60,6 @@ public interface IActivityRepository {
     void doSaveCreditPayOrder(CreateSkuQuotaOrderAggregate createSkuQuotaOrderAggregate);
 
     void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
+
+    UnpaidActivityOrderEntity queryUnpaidActivityOrder(SkuRechargeEntity skuRechargeEntity);
 }

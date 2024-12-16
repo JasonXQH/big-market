@@ -3,6 +3,7 @@ package io.github.jasonxqh.api;
 import io.github.jasonxqh.api.dto.*;
 import io.github.jasonxqh.api.response.Response;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -42,4 +43,8 @@ public interface  IRaffleActivityService {
 
 
     Response<Boolean> creditPayExchangeSku( SkuProductShopCartRequestDTO request);
+
+    Response<List<SkuProductResponseDTO>> querySkuProductListByActivityId(Long activityId);
+
+    Response<BigDecimal> queryUserCreditAccount(String userId);
 }

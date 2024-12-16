@@ -47,6 +47,10 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         if(null == sku || StringUtils.isEmpty(userId) ||StringUtils.isEmpty(outBusinessNo)) {
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(),ResponseCode.ILLEGAL_PARAMETER.getInfo());
         }
+        UnpaidActivityOrderEntity unpaidActivityOrder = activityRepository.queryUnpaidActivityOrder(skuRechargeEntity);
+        if(unpaidActivityOrder != null) {
+            return unpaidActivityOrder;
+        }
         //2.查询基础信息
         //2.1根据sku查询sku信息
         RaffleActivitySkuEntity raffleActivitySkuEntity = queryActivitySkuById(sku);

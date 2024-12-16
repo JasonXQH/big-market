@@ -62,7 +62,7 @@ public class CreditAdjustServiceTest {
         skuRechargeEntity.setUserId("lzh");
         skuRechargeEntity.setSku(9011L);
         skuRechargeEntity.setOrderTradeType(OrderTradeTypeVO.credit_pay_trade);
-        skuRechargeEntity.setOutBusinessNo("70009240609008");
+        skuRechargeEntity.setOutBusinessNo("70009240609009");
         accountQuotaService.createOrder(skuRechargeEntity);
         // 然后创建积分变更订单，变更成功后，说明消费成功
         // 然后发送mq消息告诉customer，对raffle_activity_account进行更新，添加抽奖次数
@@ -71,7 +71,7 @@ public class CreditAdjustServiceTest {
         tradeEntity.setTradeName(TradeNameVO.CONVERT_SKU);
         tradeEntity.setTradeType(TradeTypeVO.reverse);
         tradeEntity.setAmount(new BigDecimal("-10"));
-        tradeEntity.setOutBusinessNo("70009240609008");
+        tradeEntity.setOutBusinessNo("70009240609009");
         creditAdjustService.createOrder(tradeEntity);
         new CountDownLatch(1).await();
     }

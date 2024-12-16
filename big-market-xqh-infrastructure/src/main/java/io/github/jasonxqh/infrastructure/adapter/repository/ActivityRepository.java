@@ -679,6 +679,27 @@ public class ActivityRepository implements IActivityRepository {
     }
 
     @Override
+    public UnpaidActivityOrderEntity queryUnpaidActivityOrder(SkuRechargeEntity skuRechargeEntity) {
+        RaffleActivityOrder raffleActivityOrderReq = new RaffleActivityOrder();
+        raffleActivityOrderReq.setUserId(skuRechargeEntity.getUserId());
+        raffleActivityOrderReq.setSku(skuRechargeEntity.getSku());
+        RaffleActivityOrder raffleActivityOrderRes = raffleActivityOrderDao.queryUnpaidActivityOrder(raffleActivityOrderReq);
+        if(null == raffleActivityOrderRes) {
+            //创建一笔新的对象
+            return null;
+        }else{
+            //返回查询到的对象
+            return UnpaidActivityOrderEntity.builder()
+                    .userId(raffleActivityOrderRes.getUserId())
+                    .orderId(raffleActivityOrderRes.getOrderId())
+                    .payAmount(raffleActivityOrderRes.getPayAmount())
+                    .outBusinessNo(raffleActivityOrderRes.getOutBusinessNo())
+                    .build();
+        }
+
+    }
+
+    @Override
     public List<RaffleActivitySkuEntity> queryActivitySkuByActivityId(Long activityId) {
         List<RaffleActivitySku> raffleActivitySkus = skuDao.queryActivitySkuByActivityId(activityId);
         return raffleActivitySkus.stream()
