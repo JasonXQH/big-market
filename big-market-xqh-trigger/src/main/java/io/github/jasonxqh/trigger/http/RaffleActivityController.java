@@ -174,7 +174,7 @@ public class RaffleActivityController implements IRaffleActivityService {
      * <p>
      * curl -X POST http://localhost:8091/api/v1/raffle/activity/calendar_sign_rebate -d "userId=xiaofuge" -H "Content-Type: application/x-www-form-urlencoded"
      */
-    @RequestMapping(value = "calender_sign_rebate", method = RequestMethod.POST)
+    @RequestMapping(value = "calendar_sign_rebate", method = RequestMethod.POST)
     @Override
     public Response<Boolean> calendarSignRebate(@RequestParam String userId) {
         try{
@@ -320,7 +320,13 @@ public class RaffleActivityController implements IRaffleActivityService {
                     .info(ResponseCode.SUCCESS.getInfo())
                     .data(true)
                     .build();
-        } catch (Exception e) {
+        } catch (AppException e) {
+            log.error("积分兑换商品失败 userId:{} activityId:{}",  request.getUserId(), request.getSku(), e);
+            return Response.<Boolean>builder()
+                    .code(e.getCode())
+                    .info(e.getInfo())
+                    .build();
+        }  catch (Exception e) {
             log.error("积分兑换商品失败 userId:{} sku:{}", request.getUserId(), request.getSku(), e);
             return Response.<Boolean>builder()
                     .code(ResponseCode.UN_ERROR.getCode())

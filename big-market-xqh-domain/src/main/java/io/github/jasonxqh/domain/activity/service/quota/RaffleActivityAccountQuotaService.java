@@ -8,6 +8,7 @@ import io.github.jasonxqh.domain.activity.model.valobj.OrderStateVO;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivitySkuStockService;
 import io.github.jasonxqh.domain.activity.service.quota.policy.ITradePolicy;
 import io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory.DefaultActionChainFactory;
+import io.github.jasonxqh.domain.credit.adapter.repository.ICreditRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,8 @@ import java.util.Map;
 @Service
 public class RaffleActivityAccountQuotaService extends AbstractRaffleActivityAccountQuota implements IRaffleActivitySkuStockService {
 
-    public RaffleActivityAccountQuotaService(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory, Map<String, ITradePolicy> tradePolicyGroup) {
-        super(activityRepository, actionChainFactory,tradePolicyGroup);
+    public RaffleActivityAccountQuotaService(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory, Map<String, ITradePolicy> tradePolicyGroup, ICreditRepository creditRepository) {
+        super(activityRepository, actionChainFactory,tradePolicyGroup, creditRepository);
     }
 
     @Override

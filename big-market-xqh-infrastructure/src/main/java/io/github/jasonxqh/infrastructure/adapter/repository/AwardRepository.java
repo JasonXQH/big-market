@@ -200,7 +200,9 @@ public class AwardRepository implements IAwardRepository {
             });
         }finally {
             routerStrategy.clear();
-            lock.unlock();
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
         }
 
     }

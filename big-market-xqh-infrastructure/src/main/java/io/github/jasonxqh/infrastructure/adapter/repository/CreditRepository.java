@@ -28,6 +28,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -91,7 +92,16 @@ public class CreditRepository implements ICreditRepository {
                     if (null == userCreditAccount) {
                         userCreditAccountDao.insert(userCreditAccountReq);
                     } else {
-                        userCreditAccountDao.updateAddAmount(userCreditAccountReq);
+                        BigDecimal availableAmount = userCreditAccountReq.getAvailableAmount();
+                        if (availableAmount.compareTo(BigDecimal.ZERO) >= 0) {
+                            userCreditAccountDao.updateAddAmount(userCreditAccountReq);
+                        } else {
+                            int subtractionCount = userCreditAccountDao.updateSubtractionAmount(userCreditAccountReq);
+                            if (1 != subtractionCount) {
+                                status.setRollbackOnly();
+                                throw new AppException(ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getCode(), ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getInfo());
+                            }
+                        }
                     }
                     //写入任务
                     taskDao.saveTask(task);
@@ -108,7 +118,9 @@ public class CreditRepository implements ICreditRepository {
             });
         }finally {
             routerStrategy.clear();
-            lock.unlock();
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
         }
         //用线程池的方式实现：发成功了就成功，失败的话，就重新发送
         try {
@@ -127,12 +139,34 @@ public class CreditRepository implements ICreditRepository {
     public UserCreditAccountEntity queryUserCreditAccountByUserId(String userId) {
         UserCreditAccount userCreditAccountReq = new UserCreditAccount();
         userCreditAccountReq.setUserId(userId);
-        routerStrategy.doRouter(userId);
-        UserCreditAccount userCreditAccountRes = userCreditAccountDao.queryUserCreditAccountByUserId(userCreditAccountReq);
-        return UserCreditAccountEntity.builder()
-                .userId(userCreditAccountRes.getUserId())
-                .adjustAmount(userCreditAccountRes.getAvailableAmount())
-                .build();
+        try {
+            routerStrategy.doRouter(userId);
+            UserCreditAccount userCreditAccountRes = userCreditAccountDao.queryUserCreditAccountByUserId(userCreditAccountReq);
+            BigDecimal availableAmount = BigDecimal.ZERO;
+            if (null != userCreditAccountRes) {
+                availableAmount = userCreditAccountRes.getAvailableAmount();
+            }
+            return UserCreditAccountEntity.builder()
+                    .userId(userId)
+                    .adjustAmount(availableAmount)
+                    .build();
+        }finally {
+            routerStrategy.clear();
+        }
+    }
+
+    @Override
+    public BigDecimal queryUserCreditAvailableAmountByUserId(String userId) {
+        try {
+            routerStrategy.doRouter(userId);
+            UserCreditAccount userCreditAccountReq = new UserCreditAccount();
+            userCreditAccountReq.setUserId(userId);
+            UserCreditAccount userCreditAccount = userCreditAccountDao.queryUserCreditAccountByUserId(userCreditAccountReq);
+            if (null == userCreditAccount) return BigDecimal.ZERO;
+            return userCreditAccount.getAvailableAmount();
+        } finally {
+            routerStrategy.clear();
+        }
     }
 
 }

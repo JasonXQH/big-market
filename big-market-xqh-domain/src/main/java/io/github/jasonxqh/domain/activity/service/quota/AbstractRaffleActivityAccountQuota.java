@@ -4,25 +4,29 @@ import com.alibaba.fastjson2.JSON;
 import io.github.jasonxqh.domain.activity.adapter.repository.IActivityRepository;
 import io.github.jasonxqh.domain.activity.model.aggregate.CreateSkuQuotaOrderAggregate;
 import io.github.jasonxqh.domain.activity.model.entity.*;
+import io.github.jasonxqh.domain.activity.model.valobj.OrderTradeTypeVO;
 import io.github.jasonxqh.domain.activity.service.IRaffleActivityAccountQuotaService;
 import io.github.jasonxqh.domain.activity.service.quota.policy.ITradePolicy;
 import io.github.jasonxqh.domain.activity.service.quota.rule.chain.IActionChain;
 import io.github.jasonxqh.domain.activity.service.quota.rule.chain.factory.DefaultActionChainFactory;
+import io.github.jasonxqh.domain.credit.adapter.repository.ICreditRepository;
 import io.github.jasonxqh.types.enums.ResponseCode;
 import io.github.jasonxqh.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Slf4j
 public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityAccountQuotaSupport implements IRaffleActivityAccountQuotaService {
 
     private final Map<String, ITradePolicy> tradePolicyGroup;
-
-    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory, Map<String, ITradePolicy> tradePolicyGroup) {
+    private final ICreditRepository creditRepository;
+    public AbstractRaffleActivityAccountQuota(IActivityRepository activityRepository, DefaultActionChainFactory actionChainFactory, Map<String, ITradePolicy> tradePolicyGroup, ICreditRepository creditRepository) {
         super(activityRepository, actionChainFactory);
         this.tradePolicyGroup = tradePolicyGroup;
+        this.creditRepository = creditRepository;
     }
 
     @Override
@@ -58,6 +62,16 @@ public abstract class AbstractRaffleActivityAccountQuota extends RaffleActivityA
         RaffleActivityEntity activityEntity = queryActivityById(raffleActivitySkuEntity.getActivityId());
         //2.3查询次数信息，即用户在活动上可参与的次数
         RaffleActivityCountEntity countEntity = queryActivityCount(raffleActivitySkuEntity.getActivityCountId());
+
+        //3.账户额度校验，因为是交易属性
+        if(OrderTradeTypeVO.credit_pay_trade.equals(skuRechargeEntity.getOrderTradeType())){
+            //校验账户余额是否足够
+            BigDecimal availableAmount = creditRepository.queryUserCreditAvailableAmountByUserId(userId);
+            if (availableAmount.compareTo(raffleActivitySkuEntity.getProductAmount()) < 0) {
+                throw new AppException(ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getCode(), ResponseCode.USER_CREDIT_ACCOUNT_NO_AVAILABLE_AMOUNT.getInfo());
+            }
+        }
+
         //3.责任链校验
         IActionChain actionChain = actionChainFactory.openLogicChain();
         //检验成功，则会扣减activity的sku库存，防止超卖(超卖次数)

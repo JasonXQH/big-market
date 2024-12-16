@@ -610,6 +610,9 @@ public class ActivityRepository implements IActivityRepository {
             RaffleActivityOrder raffleActivityOrderRes = raffleActivityOrderDao.queryRaffleActivityOrderByUserIdAndOutBN(raffleActivityOrderReq);
             if(raffleActivityOrderRes == null) {
                 log.info("无法从raffle_activity_order中找到对应订单，可能是no_pay类型的订单,userId:{},outBusnessNo:{}",deliveryOrderEntity.getUserId(),deliveryOrderEntity.getOutBusinessNo());
+                if(lock.isLocked()){
+                    lock.unlock();
+                }
                 return;
             }
             // 账户对象 - 总
@@ -674,7 +677,9 @@ public class ActivityRepository implements IActivityRepository {
             });
         } finally {
             dbRouter.clear();
-            lock.unlock();
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
         }
     }
 

@@ -3,6 +3,8 @@ package io.github.jasonxqh.infrastructure.dao;
 import io.github.jasonxqh.infrastructure.dao.po.award.UserCreditAccount;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.math.BigDecimal;
+
 @Mapper
 public interface IUserCreditAccountDao {
     int updateAddAmount(UserCreditAccount userCreditAccountReq);
@@ -11,7 +13,9 @@ public interface IUserCreditAccountDao {
 
     UserCreditAccount queryUserCreditAccountByUserId(UserCreditAccount userCreditAccountReq);
 
-    void updateSubstractAmount(UserCreditAccount userCreditAccountReq);
+    int updateSubtractionAmount(UserCreditAccount userCreditAccountReq);
+
+
 
     //对积分账户的操作
 }
